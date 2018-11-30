@@ -4,8 +4,7 @@
              v-for="(win, key, index) in windows"
              :key="key"
              :class="{'broadcast--disabled': win.disabled}"
-             v-dragging="{ item: win, list: windows, group: 'window' }"
-        >
+             v-dragging="{ item: win, list: windows, group: 'window' }">
             <transition name="broadcast__add-">
                 <div class="broadcast__add"
                      v-if="win.disabled"
@@ -66,7 +65,7 @@
                         disabled: 1
                     }
                 ],
-                windowsInterator: 0,
+                windowsInterator: 1,
             }
         },
         components: {
@@ -96,10 +95,10 @@
                 }
             },
             addBroadcast() {
-                this.windows[this.windowsInterator].disabled = 0;
-                let sum = this.windows.length;
-                let int = this.windowsInterator++;
-                this.$set(this.windows, this.windowsInterator, {url: '', disabled: 1, index: int+sum}); // к массиву windows вставляем поле/ключ windowsInterator с default объектом
+                let obj = this.windows[this.windowsInterator];
+                    obj.disabled = 0; // снимаем блокировку с последнего окна
+                this.windowsInterator++;
+                this.$set(this.windows, this.windowsInterator, {url: '', disabled: 1, index: obj.index+1}); // к массиву windows вставляем поле/ключ windowsInterator с default объектом
             },
             deleteBroadcast(key) {
                 this.windowsInterator--;
