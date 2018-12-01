@@ -47,6 +47,7 @@
 
 <script>
     import { eventEmitter } from '../main.js'
+    import urlParser from 'js-video-url-parser'
     import Error from './Error.vue'
 
     export default {
@@ -74,23 +75,41 @@
         methods: {
             lineProcessing: function(key) {
                 const url = this.windows[key].url;
+                const match = urlParser.parse(url);
+                // console.log(match);
 
                 /* Проверка на наличие url */
-                if (!/^(http|https):\/\/[^ "]+$/.test(url)) {
-                    this.$store.dispatch('setError', {text: 'Введите корректный URL адрес', index: key});
+                if (match === undefined) { // старое условие !/^(http|https):\/\/[^ "]+$/.test(url)
+                    this.$store.dispatch('setError', {text: 'Введенный адрес ресурса не поддерживается', index: key});
                     this.windows[key].url='';
-                    return;
+                    return false;
                 }
 
-                /* Проверяем url на наличие youtube и преобразовывваем */
-                if(url.indexOf('youtu') + 1) {
-                    let regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-                    let match = url.match(regExp);
-                    let params = '?autoplay=1'+(!key?'':'&mute=1');
-                    if (match && match[2].length === 11) {
-                        this.windows[key].url = 'https://www.youtube.com/embed/'+match[2]+params;
+                /* Проверяем url и преобразовывваем */
+                if(match.provider === 'youtube') { // старое условие url.indexOf('twitch') + 1
+                    let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
+                    if (match.id) {
+                        this.windows[key].url = 'https://www.youtube.com/embed/'+match.id+params;
                     } else {
-                        this.$store.dispatch('setError', {text: 'Проверьте введенный URL адрес YouTube', index: key});
+                        this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
+                        this.windows[key].url='';
+                        return false;
+                    }
+                }
+                if(match.provider === 'twitch') {
+                    /**
+                    * TODO: Реализовать поддержку чата трансляции (опционально, по аналогии с "сайд баром" т.е. выдвижной )
+                    * Пример урла https://www.twitch.tv/embed/battlestategames/chat
+                    **/
+                    let params = '&autoplay=true'+(!key?'&muted=false':'&muted=true');
+                    if (match.channel && match.channel !== 'directory') {
+                        this.windows[key].url = 'https://player.twitch.tv/?channel='+match.channel;
+                    } else if (match.id) {
+                        this.windows[key].url = 'https://player.twitch.tv/?video='+match.id+params;
+                    } else {
+                        this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
+                        this.windows[key].url='';
+                        return false;
                     }
                 }
             },
@@ -104,6 +123,9 @@
                 this.windowsInterator--;
                 this.$delete(this.windows, key);
             }
+        },
+        mounted () {
+
         },
         created () {
             eventEmitter.$on('urlUpdated', () => { // Прослушиваем событие urlUpdated
