@@ -3,14 +3,12 @@
         <div class="broadcast"
              v-for="(win, key, index) in windows"
              :key="key"
-             :class="{'broadcast--disabled': win.disabled,'broadcast--first': key === fistWindow, 'broadcast--collapse': key === collapseWindow }"
+             :class="{'broadcast--disabled': win.disabled, 'broadcast--first': key === fistWindow, 'broadcast--collapse': key === collapseWindow }"
              v-dragging="{ item: win, list: windows, group: 'window' }">
-            <transition name="broadcast__append-">
-                <div class="broadcast__append"
-                     v-if="win.disabled"
-                     @click="addBroadcast"
-                ></div>
-            </transition>
+            <div class="broadcast__append"
+                 v-if="win.disabled"
+                 @click="addBroadcast"
+            ></div>
             <div class="broadcast__bar">
                 <div class="broadcast__btn broadcast__btn--maximize"
                      title="Развернуть окно добавления"
@@ -21,6 +19,11 @@
                      title="Свернуть окно"
                      v-if="win.disabled && collapseWindow === null"
                      @click="toggleWindows(key)"
+                ></div>
+                <div class="broadcast__btn broadcast__btn--chat"
+                     title="Показать/скрыть чат"
+                     v-if="win.chat.url.length"
+                     @click="toggleChat(key)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--expand"
                      title="Сделать основным"
@@ -42,6 +45,20 @@
                         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen
                 ></iframe>
+                <transition name="broadcast__chat-">
+                    <div class="broadcast__chat"
+                         v-show="win.chat.show"
+                    >
+                        <iframe
+                                width="240"
+                                height="315"
+                                :src="win.chat.url"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                        ></iframe>
+                    </div>
+                </transition>
             </div>
             <div class="broadcast__panel">
                 <keep-alive>
@@ -74,15 +91,14 @@
                     {
                         index: 1,
                         url: '',
-                        disabled: 0
-                    },
-                    {
-                        index: 2,
-                        url: '',
-                        disabled: 1
+                        disabled: 0,
+                        chat: {
+                            url: '',
+                            show: 1
+                        }
                     }
                 ],
-                windowsInterator: 1,
+                windowsInterator: 0,
                 fistWindow: 0,
                 collapseWindow: null,
             }
@@ -116,14 +132,15 @@
                 }
                 if(match.provider === 'twitch') {
                     /**
-                    * TODO: Реализовать поддержку чата трансляции (опционально, по аналогии с "сайд баром" т.е. выдвижной )
-                    * Пример урла https://www.twitch.tv/embed/battlestategames/chat
-                    **/
+                     * TODO: Чат временно доступен только для главного окна
+                     */
                     let params = '&autoplay=true'+(!key?'&muted=false':'&muted=true');
                     if (match.channel && match.channel !== 'directory') {
-                        this.windows[key].url = 'https://player.twitch.tv/?channel='+match.channel;
+                        this.windows[key].url = 'https://player.twitch.tv/?channel='+match.channel+params;
+                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat';
                     } else if (match.id) {
                         this.windows[key].url = 'https://player.twitch.tv/?video='+match.id+params;
+                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat';
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
                         this.windows[key].url='';
@@ -135,7 +152,7 @@
                 let obj = this.windows[this.windowsInterator];
                     obj.disabled = 0; // снимаем блокировку с последнего окна
                 this.windowsInterator++;
-                this.$set(this.windows, this.windowsInterator, {url: '', disabled: 1, index: obj.index+1}); // к массиву windows вставляем поле/ключ windowsInterator с default объектом
+                this.$set(this.windows, this.windowsInterator, {url: '', disabled: 1, chat: {url: '', show: 0}, index: obj.index+1}); // к массиву windows вставляем поле/ключ windowsInterator с default объектом
             },
             deleteBroadcast(key) {
                 this.windowsInterator--;
@@ -150,15 +167,21 @@
                 } else {
                     this.collapseWindow = null;
                 }
+            },
+            toggleChat(key) {
+                let chat = this.windows[key].chat;
+                    chat.show = !chat.show;
             }
-
         },
         mounted () {
 
         },
         created () {
+            this.addBroadcast();
             eventEmitter.$on('urlUpdated', () => { // Прослушиваем событие urlUpdated
                 this.windows[0].url="https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1"
+                /*this.windows[0].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1"
+                this.windows[0].chat.url="https://www.twitch.tv/embed/xairas_gaming/chat"*/
             })
         }
     }
@@ -179,8 +202,8 @@
         margin: 10px;
         display: inline-block;
         flex-grow: 1;
-        /*width: calc(50% - 10px);*/
-        min-width: calc(25% - 20px);
+        width: calc(25% - 20px);
+        /*min-width: calc(25% - 20px);*/
         height: calc(40vh - 30px);
         font-size: 0;
         line-height: 0;
@@ -191,6 +214,7 @@
             position: absolute;
             top: 0;
             right: 0;
+            z-index: 3;
             &:first-child {
                 margin-left: 0;
             }
@@ -204,6 +228,7 @@
             font-size: 18px;
             line-height: 25px;
             text-align: center;
+            vertical-align: top;
             background-color: rgba(26, 26, 26, 0.8);
             transition: opacity 0.2s ease-in-out;
             border-radius: 0 0 4px 4px;
@@ -223,6 +248,9 @@
             &--maximize {
                 background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20x%3D%220px%22%20y%3D%220px%22%20fill%3D%22%23fff%22%3E%3Cg%3E%3Cpath%20d%3D%22M20.01034%2C4.48959V8.73227a.5.5%2C0%2C0%2C1-.99993%2C0V5.69669L5.69669%2C19.01041H8.73227a.49994.49994%2C0%2C1%2C1%2C0%2C.99987H4.48959a.4998.4998%2C0%2C0%2C1-.49993-.49994V15.26773a.5.5%2C0%2C1%2C1%2C.99993%2C0v3.03558L18.30331%2C4.98953H15.26773a.49994.49994%2C0%2C1%2C1%2C0-.99987h4.24268A.49983.49983%2C0%2C0%2C1%2C20.01034%2C4.48959ZM6%2C11.5V6h5.5a.5.5%2C0%2C0%2C0%2C0-1h-6a.49971.49971%2C0%2C0%2C0-.5.5v6a.5.5%2C0%2C0%2C0%2C1%2C0ZM18.5%2C19h-6a.5.5%2C0%2C0%2C1%2C0-1H18V12.5a.5.5%2C0%2C0%2C1%2C1%2C0v6A.49971.49971%2C0%2C0%2C1%2C18.5%2C19Z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E%0D%0A') 50% 50% / 24px no-repeat rgba(26, 26, 26, 0.8);
             }
+            &--chat {
+                background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20data-name%3D%22Layer%201%22%20viewBox%3D%220%200%2024%2024%22%20x%3D%220px%22%20y%3D%220px%22%20fill%3D%22%23fff%22%3E%3Cpath%20d%3D%22M18%2C8H15V6a2%2C2%2C0%2C0%2C0-2-2H6A2%2C2%2C0%2C0%2C0%2C4%2C6v5a2%2C2%2C0%2C0%2C0%2C2%2C2v1.58575a.99927.99927%2C0%2C0%2C0%2C1.0072%2C1.002.97924.97924%2C0%2C0%2C0%2C.69989-.29486L9%2C14v1a2%2C2%2C0%2C0%2C0%2C2%2C2h3l2.29291%2C2.29291a.97924.97924%2C0%2C0%2C0%2C.69989.29486A.99927.99927%2C0%2C0%2C0%2C18%2C18.58575V17a2%2C2%2C0%2C0%2C0%2C2-2V10A2%2C2%2C0%2C0%2C0%2C18%2C8ZM7%2C14.58575V12H6a1.00115%2C1.00115%2C0%2C0%2C1-1-1V6A1.00115%2C1.00115%2C0%2C0%2C1%2C6%2C5h7a1.00115%2C1.00115%2C0%2C0%2C1%2C1%2C1v5a1.00115%2C1.00115%2C0%2C0%2C1-1%2C1H9.58582ZM19%2C15a1.00115%2C1.00115%2C0%2C0%2C1-1%2C1H17v2.58575L14.41418%2C16H11a1.00115%2C1.00115%2C0%2C0%2C1-1-1V13h3a2%2C2%2C0%2C0%2C0%2C2-2V9h3a1.00115%2C1.00115%2C0%2C0%2C1%2C1%2C1Z%22%2F%3E%3C%2Fsvg%3E%0D%0A') 50% 50% / 24px no-repeat rgba(26, 26, 26, 0.8);
+            }
         }
         &__number {
             position: absolute;
@@ -239,6 +267,7 @@
             background-color: rgba(26, 26, 26, 0.8);
             transition: opacity 0.2s ease-in-out;
             opacity: 0;
+            z-index: 2;
         }
         &:hover & {
             &__number,
@@ -247,12 +276,33 @@
             }
         }
         &__video {
+            position: relative;
+            display: flex;
             width: 100%;
             height: calc(100% - 30px);
             background:  rgba(225, 225, 225, .037);
             iframe {
                 width: 100%;
                 height: 100%;
+            }
+        }
+        &__chat {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: block;
+            width: 30%;
+            min-width: 240px;
+            max-width: 340px;
+            height: 100%;
+            &--enter,
+            &--leave,
+            &--leave-to {
+                right: -100%;
+                width: 0;
+                &-active {
+                    transition: all 0.3s cubic-bezier(.65, .05, .36, 1);
+                }
             }
         }
         &__panel {
@@ -299,16 +349,17 @@
             opacity: .06;
             cursor: cell;
             z-index: 3;
-            &--enter,
-            &--leave-to {
-                opacity: 0;
-            }
         }
         &--first {
             display: block;
             order: -1;
             width: 100%;
             height: calc(60vh - 86px);
+        }
+        &--first & {
+            &__chat {
+                position: relative;
+            }
         }
         &--collapse {
             position: fixed;
@@ -355,18 +406,66 @@
             text-align: left;
             z-index: 1;
         }
-        &-enter,
-        &-leave-to {
+        &--enter,
+        &--leave-to {
             top: auto;
             bottom: -30px;
         }
     }
-    @media all and (max-width: 768px) {
+    @media only screen and (max-width: 812px) {
         .broadcast {
             width: 100%;
-            height: calc(30vh - 28px);
-            &:first-child {
-                height: calc(30vh - 28px);
+            height: calc(33vh - (128px / 3));
+            &__btn {
+                &--chat {
+                    display: none;
+                }
+            }
+            &__chat {
+                display: none;
+            }
+            &--first {
+                height: calc(33vh - (128px / 3));
+            }
+        }
+    }
+    @media only screen and (min-width: 1024px) and (orientation: portrait) {
+        .broadcast {
+            width: 100%;
+            height: calc(33vh - (128px / 3));
+            &__btn {
+                &--chat {
+                    display: inline-block;
+                }
+            }
+            &__chat {
+                display: block;
+                position: relative;
+            }
+            &--first {
+                height: calc(33vh - (128px / 3));
+            }
+            &--first & {
+                &__chat {
+                    position: relative;
+                }
+            }
+        }
+    }
+    @media only screen and (max-width: 1023px) and (orientation: landscape) {
+        .broadcast {
+            width: 100%;
+            height: calc(100vh - 96px);
+            &__chat {
+                position: relative;
+            }
+            &--first {
+                height: calc(100vh - 96px);
+            }
+            &--first & {
+                &__chat {
+                    position: relative;
+                }
             }
         }
     }

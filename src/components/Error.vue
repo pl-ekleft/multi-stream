@@ -1,5 +1,5 @@
 <template>
-    <transition name="error">
+    <transition name="error-">
         <div class="error-box" v-show="error.index === index" @mouseenter="closeError">
             <div class="error-box__message" v-html="error.text"></div>
         </div>
@@ -55,8 +55,8 @@
             line-height: 20px;
         }
     }
-    &-enter,
-    &-leave-to {
+    &--enter,
+    &--leave-to {
         top: -56px;
         &-active {
             transition: all .3s cubic-bezier(.65, .05, .36, 1);

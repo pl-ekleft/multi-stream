@@ -1,11 +1,11 @@
 <template>
     <div class="sidebar" v-show="sidebarStatus">
-        <transition name="sidebar__wrapper">
+        <transition name="sidebar__wrapper-">
             <div class="sidebar__wrapper" v-show="sidebarStatus">
 
             </div>
         </transition>
-        <transition name="sidebar__shadow">
+        <transition name="sidebar__shadow-">
             <div class="sidebar__shadow" v-show="shadowStatus" @click="toggleSidebar"></div>
         </transition>
     </div>
@@ -63,15 +63,12 @@
             height: 100%;
             background-color: rgb(29, 29, 29);
             z-index: 2023;
-            &-enter,
-            &-leave-to {
+            &--enter,
+            &--leave-to {
                 left: -100%;
                 &-active {
-                    transition: all .3s cubic-bezier(.65, .05, .36, 1);
+                    transition: all 0.3s cubic-bezier(.65, .05, .36, 1);
                 }
-            }
-            &-leave-to  {
-                left: 100%;
             }
         }
         &__header {
@@ -97,11 +94,11 @@
             opacity: 1;
             background: rgba(0, 0, 0, 0.5);
             z-index: inherit;
-            &-enter,
-            &-leave-to {
+            &--enter,
+            &--leave-to {
                 opacity: 0;
                 &-active {
-                    transition: opacity .3s ease;
+                    transition: opacity 3s ease;
                 }
             }
         }
