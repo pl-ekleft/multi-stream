@@ -1,10 +1,14 @@
 <template>
     <div class="wrapper">
         <div class="broadcast"
-             v-for="(win, key, index) in windows"
+             v-for="(win, key) in windows"
              :key="key"
-             :class="{'broadcast--disabled': win.disabled, 'broadcast--first': key === fistWindow, 'broadcast--collapse': key === collapseWindow }"
-             v-dragging="{ item: win, list: windows, group: 'window' }">
+             :class="{
+                 'broadcast--disabled': win.disabled,
+                 'broadcast--first': key === fistWindow,
+                 'broadcast--collapse': key === collapseWindow,
+                 'broadcast--scale': collapseWindow === 1
+             }">
             <div class="broadcast__append"
                  v-if="win.disabled"
                  @click="addBroadcast"
@@ -124,6 +128,8 @@
                     let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
                     if (match.id) {
                         this.windows[key].url = 'https://www.youtube.com/embed/'+match.id+params;
+                        this.windows[key].chat.url="";
+                        this.windows[key].chat.show=0;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
                         this.windows[key].url='';
@@ -179,7 +185,8 @@
         created () {
             this.addBroadcast();
             eventEmitter.$on('urlUpdated', () => { // Прослушиваем событие urlUpdated
-                this.windows[0].url="https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1"
+                this.windows[0].url="https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1";
+                this.windows[0].chat.show=0;
                 /*this.windows[0].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1"
                 this.windows[0].chat.url="https://www.twitch.tv/embed/xairas_gaming/chat"*/
             })
@@ -230,13 +237,18 @@
             text-align: center;
             vertical-align: top;
             background-color: rgba(26, 26, 26, 0.8);
-            transition: opacity 0.2s ease-in-out;
+            transition: opacity 0.2s ease-in-out, transform 300ms ease 0s;
             border-radius: 0 0 4px 4px;
             cursor: pointer;
             opacity: 0;
+            &:hover {
+                transform: scale(1.2);
+            }
             &--close {
                 border-radius: 0 0 0 4px;
                 background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20version%3D%221.1%22%20x%3D%220px%22%20y%3D%220px%22%20viewBox%3D%220%200%20100%20100%22%20enable-background%3D%22new%200%200%20100%20100%22%20xml%3Aspace%3D%22preserve%22%20fill%3D%22%23fff%22%3E%3Cpolygon%20points%3D%2295%2C17.837%2082.163%2C5%2050%2C37.163%2017.837%2C5%205%2C17.837%2037.163%2C50%205%2C82.163%2017.837%2C95%2050%2C62.837%2082.163%2C95%2095%2C82.163%20%20%2062.837%2C50%20%22%2F%3E%3C%2Fsvg%3E%0D%0A') 50% 50% / 16px no-repeat rgba(26, 26, 26, 0.8);
+                /*background-color: #fff;
+                mask: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20version%3D%221.1%22%20x%3D%220px%22%20y%3D%220px%22%20viewBox%3D%220%200%20100%20100%22%20enable-background%3D%22new%200%200%20100%20100%22%20xml%3Aspace%3D%22preserve%22%20fill%3D%22%23fff%22%3E%3Cpolygon%20points%3D%2295%2C17.837%2082.163%2C5%2050%2C37.163%2017.837%2C5%205%2C17.837%2037.163%2C50%205%2C82.163%2017.837%2C95%2050%2C62.837%2082.163%2C95%2095%2C82.163%20%20%2062.837%2C50%20%22%2F%3E%3C%2Fsvg%3E%0D%0A') 50% 50% / 16px no-repeat;*/
             }
             &--expand {
                 background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20version%3D%221.1%22%20x%3D%220px%22%20y%3D%220px%22%20viewBox%3D%220%200%20100%20100%22%20enable-background%3D%22new%200%200%20100%20100%22%20xml%3Aspace%3D%22preserve%22%20fill%3D%22%23fff%22%3E%3Cpath%20d%3D%22M81.9%2C19.7v60.7c0%2C0.9-0.7%2C1.6-1.6%2C1.6H51.1c-0.9%2C0-1.6-0.7-1.6-1.6c0-0.9%2C0.7-1.6%2C1.6-1.6h27.7V21.3H21.3v27.5%20%20c0%2C0.9-0.7%2C1.6-1.6%2C1.6c-0.9%2C0-1.6-0.7-1.6-1.6V19.7c0-0.9%2C0.7-1.6%2C1.6-1.6h60.7C81.2%2C18.1%2C81.9%2C18.8%2C81.9%2C19.7z%20M18.1%2C58.1%20%20c0-0.9%2C0.7-1.6%2C1.6-1.6h22.3c0.9%2C0%2C1.6%2C0.7%2C1.6%2C1.6v22.3c0%2C0.9-0.7%2C1.6-1.6%2C1.6H19.7c-0.9%2C0-1.6-0.7-1.6-1.6V58.1z%20M21.3%2C78.7h19.1%20%20V59.7H21.3V78.7z%20M47.2%2C52.8c0.3%2C0.3%2C0.7%2C0.5%2C1.1%2C0.5s0.8-0.2%2C1.1-0.5l18.1-18.1v10.4c0%2C0.9%2C0.7%2C1.6%2C1.6%2C1.6s1.6-0.7%2C1.6-1.6V30.9%20%20c0-0.9-0.7-1.6-1.6-1.6H54.8c-0.9%2C0-1.6%2C0.7-1.6%2C1.6c0%2C0.9%2C0.7%2C1.6%2C1.6%2C1.6h10.4L47.2%2C50.6C46.5%2C51.2%2C46.5%2C52.2%2C47.2%2C52.8z%22%2F%3E%3C%2Fsvg%3E%0D%0A') 50% 50% / 24px no-repeat rgba(26, 26, 26, 0.8);
@@ -361,6 +373,9 @@
                 position: relative;
             }
         }
+        &--scale {
+            height: calc(100vh - 96px);
+        }
         &--collapse {
             position: fixed;
             top: -100%;
@@ -425,14 +440,20 @@
                 display: none;
             }
             &--first {
-                height: calc(33vh - (128px / 3));
+                height: calc(33vh - (136px / 3));
+            }
+            &--scale {
+                height: calc(100vh - 96px);
+            }
+            &:first-child + &--disabled {
+                width: 100%;
             }
         }
     }
     @media only screen and (min-width: 1024px) and (orientation: portrait) {
         .broadcast {
             width: 100%;
-            height: calc(33vh - (128px / 3));
+            height: calc(33vh - (136px / 3));
             &__btn {
                 &--chat {
                     display: inline-block;
@@ -443,12 +464,18 @@
                 position: relative;
             }
             &--first {
-                height: calc(33vh - (128px / 3));
+                height: calc(33vh - (136px / 3));
             }
             &--first & {
                 &__chat {
                     position: relative;
                 }
+            }
+            &--scale {
+                height: calc(100vh - 96px);
+            }
+            &:first-child + &--disabled {
+                width: 100%;
             }
         }
     }

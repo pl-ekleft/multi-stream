@@ -2,9 +2,6 @@ import Vue from 'vue'
 import router from './router'
 import App from './App.vue'
 import store from './store' // настройка vuex
-import VueDND from 'awe-dnd'
-
-Vue.use(VueDND)
 
 Vue.config.productionTip = false
 
