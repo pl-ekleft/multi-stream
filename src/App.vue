@@ -9,7 +9,7 @@
       </nav>
     </header>
 
-    <Sidebar :sidebar-status="sidebarStatus"></Sidebar>
+    <Sidebar></Sidebar>
 
     <error-box index="main"></error-box>
 
