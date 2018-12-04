@@ -1,0 +1,50 @@
+@mixin scroll($color: transparent, $bg: hsla(0, 0%, 53.3%, .4), $bg-hover: hsla(0, 0%, 53.3%, .5)) {
+    -webkit-overflow-scrolling: touch;
+    @include no-touch-scroll();
+}
+
+@mixin no-touch-scroll($color: transparent, $bg: hsla(0, 0%, 53.3%, .4), $bg-hover: hsla(0, 0%, 53.3%, .5)) {
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: $bg-hover;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+        cursor: grab;
+    }
+    &::-webkit-scrollbar-thumb:active {
+        cursor: -moz-grabbing;
+        cursor: -webkit-grabbing;
+        cursor: grabbing;
+    }
+    &::-webkit-scrollbar {
+        margin: 0 20px;
+        width: 8px;
+        height: 8px;
+        background-color: $color;
+    }
+    &::-webkit-scrollbar-corner {
+        background-color: $color;
+    }
+    &::-webkit-scrollbar-track {
+        border: 0 solid $color;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: $bg;
+        &:hover {
+            background-color: $bg-hover;
+            cursor: -moz-grab;
+            cursor: -webkit-grab;
+            cursor: grab;
+        }
+        &:active {
+            cursor: -moz-grabbing;
+            cursor: -webkit-grabbing;
+            cursor: grabbing;
+        }
+    }
+    &::-webkit-resizer {
+        width: 0;
+        height: 0;
+        border-bottom: 8px solid $bg;
+        border-left: 8px solid transparent;
+    }
+}
