@@ -123,6 +123,7 @@
                 if (match === undefined) { // старое условие !/^(http|https):\/\/[^ "]+$/.test(url)
                     this.$store.dispatch('setError', {text: 'Введенный адрес ресурса не поддерживается', index: key});
                     this.windows[key].url='';
+                    this.windows[key].chat.url='';
                     return false;
                 }
 
@@ -131,11 +132,11 @@
                     let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
                     if (match.id) {
                         this.windows[key].url = 'https://www.youtube.com/embed/'+match.id+params;
-                        this.windows[key].chat.url="";
-                        this.windows[key].chat.show=0;
+                        this.windows[key].chat.url = 'https://www.youtube.com/live_chat?v='+match.id+'&embed_domain='+document.domain;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
                         this.windows[key].url='';
+                        this.windows[key].chat.url='';
                         return false;
                     }
                 }
@@ -150,6 +151,7 @@
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
                         this.windows[key].url='';
+                        this.windows[key].chat.url='';
                         return false;
                     }
                 }
