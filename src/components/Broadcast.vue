@@ -114,7 +114,7 @@
             /**
              * TODO: Реализовать поиск по youtube && twitch, через строку ввода адреса или отдельным полем поиска
              */
-            lineProcessing: function(key) {
+            lineProcessing(key) {
                 const url = this.windows[key].url;
                 const match = urlParser.parse(url);
                 // console.log(match);
@@ -188,9 +188,8 @@
             this.addBroadcast();
             eventEmitter.$on('urlUpdated', () => { // Прослушиваем событие urlUpdated
                 this.windows[0].url="https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1";
-                this.windows[0].chat.show=0;
-                /*this.windows[0].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1"
-                this.windows[0].chat.url="https://www.twitch.tv/embed/xairas_gaming/chat"*/
+                // this.windows[0].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1";
+                this.lineProcessing(0);
             })
         }
     }
