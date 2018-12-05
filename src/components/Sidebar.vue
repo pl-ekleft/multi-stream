@@ -107,7 +107,7 @@
                 flex-direction: row;
                 align-items: center;
                 box-sizing: border-box;
-                color: #f0f0f0;
+                color: $rgba-255-94;
                 font-size: 1.5rem;
                 line-height: 3rem;
                 > a, > span {

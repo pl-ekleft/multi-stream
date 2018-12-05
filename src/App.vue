@@ -97,18 +97,35 @@
   }
   .logo {
     display: inline-block;
-    grid-column: span 1;
     width: 56px;
     height: 36px;
-    background: url($icon-logo) 50% 50% / 100% no-repeat;
+    &:before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      /*transition: background .3s ease-in-out;*/
+      mask: url($icon-logo) 50% 50% / cover no-repeat;
+      background: #f6f8f9;
+      background: -moz-linear-gradient(top, #f6f8f9 0%, #e5ebee 50%, #d7dee3 51%, #f5f7f9 100%);
+      background: -webkit-linear-gradient(top, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+      background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f6f8f9', endColorstr='#f5f7f9',GradientType=0 );
+    }
   }
   .guide {
-    /*display: none;*/
     display: inline-block;
-    grid-column: span 1;
     width: 30px;
     height: 26px;
-    background: url($icon-guide) 50% 50% / contain no-repeat;
     cursor: pointer;
+    &:before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-color: $rgba-255;
+      mask: url($icon-guide) 50% 50% / contain no-repeat;
+      /*transition: background .3s ease-in-out;*/
+    }
   }
 </style>

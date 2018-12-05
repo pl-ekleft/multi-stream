@@ -43,14 +43,14 @@
         width: 100%;
         height: 30px;
         text-align: center;
-        background: #ff0000;
+        background: $red;
         box-sizing: border-box;
         transform: translateY(0);
         transition: all .3s ease-in-out;
         z-index: 2000;
         &__message {
             padding-right: 40px;
-            color: #fff;
+            color: $rgba-255;
             font-size: 14px;
             line-height: 20px;
         }

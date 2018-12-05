@@ -143,10 +143,10 @@
                     let params = '&autoplay=true'+(!key?'&muted=false':'&muted=true');
                     if (match.channel && match.channel !== 'directory') {
                         this.windows[key].url = 'https://player.twitch.tv/?channel='+match.channel+params;
-                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat';
+                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat?darkpopout';
                     } else if (match.id) {
                         this.windows[key].url = 'https://player.twitch.tv/?video='+match.id+params;
-                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat';
+                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat?darkpopout';
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
                         this.windows[key].url='';
@@ -231,7 +231,7 @@
             display: inline-block;
             width: 25px;
             height: 25px;
-            color: #fff;
+            color: $rgba-255;
             font-size: 18px;
             line-height: 25px;
             text-align: center;
@@ -241,27 +241,49 @@
             border-radius: 0 0 4px 4px;
             cursor: pointer;
             opacity: 0;
-            &:hover {
-                transform: scale(1.2);
+            &:before {
+                content: '';
+                display: block;
+                width: 100%;
+                height: 100%;
+                transition: background .3s ease-in-out;
+                background-color: $rgba-255;
             }
             &--close {
                 border-radius: 0 0 0 4px;
-                background: url($icon-close) 50% 50% / 16px no-repeat $rgba-26-19;
-                /*background-color: #fff;
-                mask: url($icon-close) 50% 50% / 16px no-repeat;*/
+                &:before {
+                    mask: url($icon-close) 50% 50% / 16px no-repeat;
+                }
+                &:hover {
+                    &:before {
+                        background: #a90329;
+                        background: -moz-linear-gradient(top, #a90329 0%, #8f0222 44%, #6d0019 100%);
+                        background: -webkit-linear-gradient(top, #a90329 0%,#8f0222 44%,#6d0019 100%);
+                        background: linear-gradient(to bottom, #a90329 0%,#8f0222 44%,#6d0019 100%);
+                        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a90329', endColorstr='#6d0019',GradientType=0 );
+                    }
+                }
             }
             &--expand {
-                background: url($icon-expand) 50% 50% / 24px no-repeat $rgba-26-19;
+                &:before {
+                    mask: url($icon-expand) 50% 50% / 24px no-repeat;
+                }
             }
             &--minimize {
                 border-radius: 0 0 0 4px;
-                background: url($icon-minimize) 50% 50% / 24px no-repeat $rgba-26-19;
+                &:before {
+                    mask: url($icon-minimize) 50% 50% / 24px no-repeat;
+                }
             }
             &--maximize {
-                background: url($icon-maximize) 50% 50% / 24px no-repeat $rgba-26-19;
+                &:before {
+                    mask: url($icon-maximize) 50% 50% / 24px no-repeat;
+                }
             }
             &--chat {
-                background: url($icon-chat) 50% 50% / 24px no-repeat $rgba-26-19;
+                &:before {
+                    mask: url($icon-chat) 50% 50% / 24px no-repeat;
+                }
             }
         }
         &__number {
@@ -270,7 +292,7 @@
             left: 11px;
             width: 42px;
             height: 42px;
-            color: #fff;
+            color: $rgba-255;
             font-size: 25px;
             line-height: 42px;
             text-align: center;
