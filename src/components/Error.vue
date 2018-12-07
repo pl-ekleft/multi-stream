@@ -45,7 +45,6 @@
         text-align: center;
         background: $red;
         box-sizing: border-box;
-        transform: translateY(0);
         transition: all .3s ease-in-out;
         z-index: 2000;
         &__message {
@@ -58,9 +57,6 @@
     &--enter,
     &--leave-to {
         top: -56px;
-        &-active {
-            transition: all .3s cubic-bezier(.65, .05, .36, 1);
-        }
     }
 }
 </style>

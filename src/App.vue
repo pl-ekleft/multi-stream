@@ -31,7 +31,7 @@
     },
     methods: {
         toggleSidebar () {
-            eventEmitter.$emit('sidebarStatus')
+            eventEmitter.$emit('sidebarShow')
         }
     },
     created () {
@@ -125,7 +125,6 @@
       height: 100%;
       background-color: $rgba-255;
       mask: url($icon-guide) 50% 50% / contain no-repeat;
-      /*transition: background .3s ease-in-out;*/
     }
   }
 </style>

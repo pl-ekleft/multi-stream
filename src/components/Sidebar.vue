@@ -1,7 +1,7 @@
 <template>
-    <div class="sidebar" v-show="sidebarStatus">
+    <div class="sidebar" v-show="sidebarShowHold">
         <transition name="sidebar__wrapper-">
-            <div class="sidebar__wrapper" v-show="sidebarStatus">
+            <div class="sidebar__wrapper" v-show="sidebarShow">
                 <div class="sidebar__header">
                     <span class="guide" @click="toggleSidebar"></span>
                 </div>
@@ -27,7 +27,7 @@
             </div>
         </transition>
         <transition name="sidebar__shadow-">
-            <div class="sidebar__shadow" v-show="shadowStatus" @click="toggleSidebar"></div>
+            <div class="sidebar__shadow" v-show="shadowShow" @click="toggleSidebar"></div>
         </transition>
     </div>
 </template>
@@ -38,23 +38,24 @@
         name: "Sidebar",
         data() {
             return {
-                sidebarStatus: 0,
-                shadowStatus: 0
+                sidebarShowHold: 0,
+                sidebarShow: 0,
+                shadowShow: 0
             }
         },
         methods: {
             toggleSidebar() {
-                this.sidebarStatus = !this.sidebarStatus;
-                this.shadowStatus = !this.shadowStatus;
+                this.sidebarShow = !this.sidebarShow;
+                this.shadowShow = !this.shadowShow;
 
-                if(this.sidebarStatus) {
+                if(this.sidebarShow) {
                     document.querySelector("html").setAttribute('class','hide-scroll')
                 } else {
                     document.querySelector("html").removeAttribute('class')
                 }
             },
             insertVideo () { // вставляем видео - тест
-                eventEmitter.$emit('urlUpdated') // устанавливаем событие urlUpdated
+                eventEmitter.$emit('urlUpdated') // Вызываем событие urlUpdated
                 this.toggleSidebar()
             },
             openError () { // открываем ошибку - тест
@@ -62,8 +63,19 @@
                 this.toggleSidebar()
             }
         },
+        watch: {
+            sidebarShow: function() {
+                if(this.sidebarShowHold) {
+                    setTimeout(() => {
+                        this.sidebarShowHold = !this.sidebarShowHold
+                    },200) // время равное времени transition
+                } else {
+                    this.sidebarShowHold = !this.sidebarShowHold
+                }
+            }
+        },
         created () {
-            eventEmitter.$on('sidebarStatus', () => { // Прослушиваем событие urlUpdated
+            eventEmitter.$on('sidebarShow', () => { // Прослушиваем событие sidebarShow
                 this.toggleSidebar()
             })
         }
@@ -178,18 +190,22 @@
             right: 0;
             display: block;
             width: 90%;
-            max-width: 240px;
+            max-width: 256px;
             height: 100%;
             font-size: 1.5rem;
             line-height: 1.5rem;
+            transition: transform 0.2s ease;
+            transform: translate3d(0, 0, 0);
+            /*transition: all 0.3s cubic-bezier(.65, .05, .36, 1);*/
             background-color: rgb(29, 29, 29);
             z-index: 2023;
             &--enter,
             &--leave-to {
-                right: -100%;
-                &-active {
-                    transition: all 0.3s cubic-bezier(.65, .05, .36, 1);
-                }
+                transition: transform 0.2s ease;
+                transform: translate3d(100%, 0, 0);
+                /*right: -100%;*/
+                /*transition: all 0.3s cubic-bezier(.65, .05, .36, 1);*/
+
             }
         }
         &__content {
@@ -208,15 +224,13 @@
             left: 0;
             width: 100%;
             height: 100%;
+            transition: opacity 0.2s ease;
             opacity: 1;
             background: $rgba-50;
             z-index: inherit;
             &--enter,
             &--leave-to {
                 opacity: 0;
-                &-active {
-                    transition: opacity 0.3s ease;
-                }
             }
         }
     }
