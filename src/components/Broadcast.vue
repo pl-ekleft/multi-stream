@@ -5,9 +5,9 @@
              :key="key"
              :class="{
                  'broadcast--disabled': win.disabled,
-                 'broadcast--first': key === fistWindow,
-                 'broadcast--collapse': key === collapseWindow,
-                 'broadcast--scale': collapseWindow === 1
+                 'broadcast--first': key === firstWindow && !win.disabled,
+                 'broadcast--hidden': win.index === hiddenWindow,
+                 'broadcast--scale': hiddenWindow === 1
              }">
             <div class="broadcast__append"
                  v-if="win.disabled"
@@ -16,13 +16,13 @@
             <div class="broadcast__bar">
                 <div class="broadcast__btn broadcast__btn--maximize"
                      title="Развернуть окно добавления"
-                     v-if="collapseWindow !== null"
-                     @click="toggleWindows(key)"
+                     v-if="hiddenWindow !== null"
+                     @click="toggleWindows(win.index)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--minimize"
                      title="Свернуть окно"
-                     v-if="win.disabled && collapseWindow === null"
-                     @click="toggleWindows(key)"
+                     v-if="win.disabled && hiddenWindow === null"
+                     @click="toggleWindows(win.index)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--chat"
                      title="Показать/скрыть чат"
@@ -31,7 +31,7 @@
                 ></div>
                 <div class="broadcast__btn broadcast__btn--expand"
                      title="Сделать основным"
-                     v-if="key !== fistWindow"
+                     v-if="key !== firstWindow"
                      @click="selectWindow(key)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--close"
@@ -103,8 +103,8 @@
                     }
                 ],
                 windowsInterator: 0,
-                fistWindow: 0,
-                collapseWindow: null,
+                firstWindow: 0,
+                hiddenWindow: null,
             }
         },
         components: {
@@ -122,8 +122,8 @@
                 /* Проверка на наличие url */
                 if (match === undefined) { // старое условие !/^(http|https):\/\/[^ "]+$/.test(url)
                     this.$store.dispatch('setError', {text: 'Введенный адрес ресурса не поддерживается', index: key});
-                    this.windows[key].url='';
-                    this.windows[key].chat.url='';
+                    this.windows[key].url = '';
+                    this.windows[key].chat.url = '';
                     return false;
                 }
 
@@ -135,8 +135,8 @@
                         this.windows[key].chat.url = 'https://www.youtube.com/live_chat?v='+match.id+'&embed_domain='+document.domain;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
-                        this.windows[key].url='';
-                        this.windows[key].chat.url='';
+                        this.windows[key].url = '';
+                        this.windows[key].chat.url = '';
                         return false;
                     }
                 }
@@ -150,8 +150,8 @@
                         this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat?darkpopout';
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
-                        this.windows[key].url='';
-                        this.windows[key].chat.url='';
+                        this.windows[key].url = '';
+                        this.windows[key].chat.url = '';
                         return false;
                     }
                 }
@@ -165,15 +165,17 @@
             deleteBroadcast(key) {
                 this.windowsInterator--;
                 this.$delete(this.windows, key);
+                this.firstWindow = (this.windowsInterator>1?this.firstWindow:0); // контроль первого окна (при удалении)
+                this.hiddenWindow = (this.windowsInterator?this.hiddenWindow:null); // контроль скрытого окна (при удалении)
             },
             selectWindow(key) {
-                this.fistWindow = key;
+                this.firstWindow = key;
             },
-            toggleWindows(key) {
-                if(this.collapseWindow === null) {
-                    this.collapseWindow = key;
+            toggleWindows(index) {
+                if(this.hiddenWindow === null) {
+                    this.hiddenWindow = index;
                 } else {
-                    this.collapseWindow = null;
+                    this.hiddenWindow = null;
                 }
             },
             toggleChat(key) {
@@ -187,9 +189,11 @@
         created () {
             this.addBroadcast();
             eventEmitter.$on('urlUpdated', () => { // Прослушиваем событие urlUpdated
-                this.windows[0].url="https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1";
-                // this.windows[0].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1";
-                this.lineProcessing(0);
+                const key = this.firstWindow;
+                // this.windows[key].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1";
+                this.windows[key].url = "https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1";
+                this.windows[key].chat.show = 1;
+                this.lineProcessing(key);
             })
         }
     }
@@ -399,7 +403,7 @@
         &--scale {
             height: calc(100vh - 96px);
         }
-        &--collapse {
+        &--hidden {
             position: fixed;
             top: -100%;
             left: -100%;
@@ -430,6 +434,7 @@
                 }
             }
         }
+        &--disabled:first-child,
         &:first-child + &--disabled {
             flex-grow: 0;
             width: calc(50% - 20px);
