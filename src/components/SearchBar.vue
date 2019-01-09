@@ -34,8 +34,6 @@
 </template>
 
 <script>
-    import { eventEmitter } from '../main.js';
-
     export default {
         name: "SearchBar",
         data() {
@@ -51,7 +49,7 @@
                 if (this.provider === 'youtube' && videoId.length) {
                     // Преобразуем videoId в валидный url и диспатчим
                     this.$store.dispatch('setSelectVideoUrl', `https://www.youtube.com/embed/${videoId}`);
-                    console.log('getSelectVideoUrl result:', this.$store.getters.getSelectVideoUrl);
+                    // console.log('getSelectVideoUrl result:', this.$store.getters.getSelectVideoUrl);
                 } else {
                     this.$store.dispatch('setError', {text: 'Не удалось получить videoId', index: 'main'})
                 }
@@ -67,7 +65,7 @@
                                     index: 'main'
                                 })
                             }
-                            console.log('sendingRequest result:', this.result);
+                            // console.log('sendingRequest result:', this.result);
                             /*eventEmitter.$emit('urlUpdated',{ // TODO: Тестово выводим первое видео в первое окно
                                 url:`https://www.youtube.com/embed/${this.result.items[0].id.videoId}`,
                                 chat: {

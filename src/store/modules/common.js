@@ -43,7 +43,7 @@ export default {
     clearError ({commit}) {
       commit('clearError')
     },
-    async search({commit, state}, payload) {
+    async search({commit}, payload) {
       commit('clearError');
       commit('setLoading', true);
       try {
