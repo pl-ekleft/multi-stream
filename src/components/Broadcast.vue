@@ -197,8 +197,10 @@
                     chat.show = !chat.show;
             },
             selectWindow(key,url) {// выбор окна для вставки url из поисковой выдачи
-                this.lineProcessing(key, { url: url });
-                this.$store.dispatch('clearSelectVideoUrl');
+                if(url) {
+                    this.lineProcessing(key, { url: url });
+                    this.$store.dispatch('clearSelectVideoUrl');
+                }
             }
         },
         mounted () {
@@ -232,6 +234,8 @@
         box-sizing: border-box;
     }
     .broadcast {
+        $this: &;
+
         position: relative;
         bottom: 0;
         margin: 10px;
@@ -483,7 +487,7 @@
             flex-grow: 0;
             width: calc(50% - 20px);
         }
-        &--flicker:not(&--disabled) {
+        &--flicker {
             animation: flicker 1s infinite ease-in-out alternate;
             cursor: pointer;
             &:before {
@@ -510,6 +514,17 @@
                     content: 'Выбрать это окно';
                     color: $rgba-255;
                     background-color: $blue-50;
+                }
+            }
+        }
+        &--flicker#{$this}--disabled {
+            &:before {
+                display: none;
+            }
+            &:hover {
+                #{$this}__append {
+                    background-color: $blue;
+                    opacity: .5;
                 }
             }
         }

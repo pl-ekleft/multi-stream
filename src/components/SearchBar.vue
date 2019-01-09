@@ -183,18 +183,31 @@
             &__item:hover & {
                 &__thumb {
                     &:before {
+                        content: 'Выбрать';
+                        position: absolute;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 100%;
+                        height: 100%;
+                        font-size: 2.5rem;
+                        line-height: 2.5rem;
+                        /*background: url($icon-plus) 50% 50% / contain no-repeat;*/
+                        /*background-color: $blue;
+                        mask: url($icon-plus) 50% 50% / contain no-repeat;*/
+                        opacity: 0.9;
+                        z-index: 2;
+                    }
+                    &:after {
                         content: '';
                         position: absolute;
                         top: 0;
                         left: 0;
-                        bottom: 0;
-                        right: 0;
-                        margin: auto;
-                        display: inline-block;
-                        width: 40px;
-                        height: 40px;
-                        background: url($icon-plus) 50% 50% no-repeat / contain;
-                        opacity: 0.7;
+                        display: block;
+                        width: 100%;
+                        height: 100%;
+                        background-color: $rgba-50;
+                        z-index: 1;
                     }
                 }
             }
