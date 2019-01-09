@@ -4,11 +4,15 @@
              v-for="(win, key) in windows"
              :key="key"
              :class="{
+                 'broadcast--loading': win.url,
                  'broadcast--disabled': win.disabled,
                  'broadcast--first': key === firstWindow && !win.disabled,
                  'broadcast--hidden': win.index === hiddenWindow,
-                 'broadcast--scale': hiddenWindow === 1
-             }">
+                 'broadcast--scale': hiddenWindow === 1,
+                 'broadcast--flicker': checkSelectVideoUrl
+             }"
+             @click="selectWindow(key, checkSelectVideoUrl)"
+        >
             <div class="broadcast__append"
                  v-if="win.disabled"
                  @click="addBroadcast"
@@ -32,7 +36,7 @@
                 <div class="broadcast__btn broadcast__btn--expand"
                      title="Сделать основным"
                      v-if="key !== firstWindow"
-                     @click="selectWindow(key)"
+                     @click="mainWindow(key)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--close"
                      title="Удалить окно"
@@ -110,29 +114,39 @@
         components: {
             errorBox: Error
         },
+        computed: {
+            checkSelectVideoUrl() {
+                //console.log('checkSelectVideoUrl', this.$store.getters.getSelectVideoUrl);
+                return this.$store.getters.getSelectVideoUrl;
+            }
+        },
         methods: {
-            /**
-             * TODO: Реализовать поиск по youtube && twitch, через строку ввода адреса или отдельным полем поиска
-             */
-            lineProcessing(key) {
-                const url = this.windows[key].url;
+            lineProcessing(key,payload=false) {
+                const url = payload.url||this.windows[key].url;
                 const match = urlParser.parse(url);
-                // console.log(match);
+                //console.log('lineProcessing',payload, match);
 
                 /* Проверка на наличие url */
-                if (match === undefined) { // старое условие !/^(http|https):\/\/[^ "]+$/.test(url)
+                if (match === undefined) {
                     this.$store.dispatch('setError', {text: 'Введенный адрес ресурса не поддерживается', index: key});
                     this.windows[key].url = '';
                     this.windows[key].chat.url = '';
                     return false;
                 }
 
+                /* Проверяем наличие show в payload и обновляем параметр отображение чата*/
+                if(payload.hasOwnProperty('show')) {// TODO: payload.hasOwnProperty('show') не лучшее решение
+                    // payload.findIndex('show')
+                    // payload.includes('show')
+                    this.windows[key].chat.show = payload.chat.show;
+                }
+
                 /* Проверяем url и преобразовывваем */
-                if(match.provider === 'youtube') { // старое условие url.indexOf('twitch') + 1
+                if(match.provider === 'youtube') {
                     let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
                     if (match.id) {
-                        this.windows[key].url = 'https://www.youtube.com/embed/'+match.id+params;
-                        this.windows[key].chat.url = 'https://www.youtube.com/live_chat?v='+match.id+'&embed_domain='+document.domain;
+                        this.windows[key].url = `https://www.youtube.com/embed/${match.id}${params}`;
+                        this.windows[key].chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
                         this.windows[key].url = '';
@@ -143,11 +157,11 @@
                 if(match.provider === 'twitch') {
                     let params = '&autoplay=true'+(!key?'&muted=false':'&muted=true');
                     if (match.channel && match.channel !== 'directory') {
-                        this.windows[key].url = 'https://player.twitch.tv/?channel='+match.channel+params;
-                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat?darkpopout';
+                        this.windows[key].url = `https://player.twitch.tv/?channel=${match.channel}${params}`;
+                        this.windows[key].chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
                     } else if (match.id) {
-                        this.windows[key].url = 'https://player.twitch.tv/?video='+match.id+params;
-                        this.windows[key].chat.url = 'https://www.twitch.tv/embed/'+match.channel+'/chat?darkpopout';
+                        this.windows[key].url = `https://player.twitch.tv/?video=${match.id}${params}`;
+                        this.windows[key].chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
                         this.windows[key].url = '';
@@ -168,7 +182,7 @@
                 this.firstWindow = (this.windowsInterator>1?this.firstWindow:0); // контроль первого окна (при удалении)
                 this.hiddenWindow = (this.windowsInterator?this.hiddenWindow:null); // контроль скрытого окна (при удалении)
             },
-            selectWindow(key) {
+            mainWindow(key) {
                 this.firstWindow = key;
             },
             toggleWindows(index) {
@@ -181,25 +195,34 @@
             toggleChat(key) {
                 let chat = this.windows[key].chat;
                     chat.show = !chat.show;
+            },
+            selectWindow(key,url) {// выбор окна для вставки url из поисковой выдачи
+                this.lineProcessing(key, { url: url });
+                this.$store.dispatch('clearSelectVideoUrl');
             }
         },
         mounted () {
 
         },
         created () {
-            this.addBroadcast();
-            eventEmitter.$on('urlUpdated', () => { // Прослушиваем событие urlUpdated
+            this.addBroadcast(); // вставляем окно добавления (по умолчанию он блокируется)
+            eventEmitter.$on('urlUpdated', (payload) => { // Прослушиваем событие urlUpdated
                 const key = this.firstWindow;
-                // this.windows[key].url="https://player.twitch.tv/?channel=xairas_gaming&autoplay=1";
-                this.windows[key].url = "https://www.youtube.com/embed/bpp2KgRSuPQ?autoplay=1";
-                this.windows[key].chat.show = 1;
-                this.lineProcessing(key);
+                // this.windows[key].url="https://player.twitch.tv/?channel=xairas_gaming";
+                // this.windows[key].url = "https://www.youtube.com/embed/bpp2KgRSuPQ";
+                // this.windows[key].chat.show = 1;
+                payload = payload||{ url: 'https://www.youtube.com/embed/oI3GdbsbDxk', chat: { show: 1 } };
+                this.lineProcessing(key,payload);
             })
         }
     }
 </script>
 
 <style lang="scss" scoped>
+    @keyframes flicker {
+        0% {box-shadow: 0 0 0 1px $blue;}
+        100% {box-shadow: 0 0 15px 1px $blue;}
+    }
     .wrapper {
         display: flex;
         flex-wrap: wrap;
@@ -253,6 +276,11 @@
                 height: 100%;
                 transition: background .3s ease-in-out;
                 background-color: $rgba-255;
+            }
+            &:hover {
+                &:before {
+                    background-color: $blue;
+                }
             }
             &--close {
                 border-radius: 0 0 0 4px;
@@ -308,7 +336,7 @@
             opacity: 0;
             z-index: 2;
         }
-        &:hover & {
+        &:hover:not(&--flicker) & {
             &__number,
             &__btn {
                 opacity: 1;
@@ -434,10 +462,56 @@
                 }
             }
         }
+        &--loading {
+            &:before {
+                content: 'Загрузка . . .';
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding-bottom: 30px;
+                width: 100%;
+                height: 100%;
+                color: $rgba-255-50;
+                font-size: 1.5rem;
+                line-height: 1.5rem;
+                box-sizing: border-box;
+            }
+        }
         &--disabled:first-child,
         &:first-child + &--disabled {
             flex-grow: 0;
             width: calc(50% - 20px);
+        }
+        &--flicker:not(&--disabled) {
+            animation: flicker 1s infinite ease-in-out alternate;
+            cursor: pointer;
+            &:before {
+                content: 'Выберите окно';
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding-bottom: 30px;
+                width: 100%;
+                height: 100%;
+                color: $blue;
+                background-color: $rgba-50;
+                text-shadow: 0 0 10px 5px $blue;
+                font-size: 2.5rem;
+                line-height: 2.5rem;
+                box-sizing: border-box;
+                transition: all .15s ease;
+                z-index: 5;
+            }
+            &:hover {
+                animation-play-state: paused;
+                &:before {
+                    content: 'Выбрать это окно';
+                    color: $rgba-255;
+                    background-color: $blue-50;
+                }
+            }
         }
     }
     .error {

@@ -2,10 +2,11 @@
   <div id="app">
     <header class="header">
       <router-link to="/" class="logo"></router-link>
+      <search-bar></search-bar>
       <span class="guide" @click="toggleSidebar"></span>
     </header>
 
-    <Sidebar></Sidebar>
+    <side-bar></side-bar>
 
     <error-box index="main"></error-box>
 
@@ -16,6 +17,7 @@
 <script>
   import { eventEmitter } from './main.js'
   import Sidebar from './components/Sidebar.vue'
+  import SearchBar from './components/SearchBar.vue'
   import Error from './components/Error.vue'
 
   export default {
@@ -27,11 +29,12 @@
     },
     components: {
         errorBox: Error,
-        Sidebar
+        sideBar: Sidebar,
+        searchBar: SearchBar,
     },
     methods: {
         toggleSidebar () {
-            eventEmitter.$emit('sidebarShow')
+            eventEmitter.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
         }
     },
     created () {
@@ -55,7 +58,7 @@
     min-height: 100%;
     color: $rgba-255-88;
     box-sizing: border-box;
-    background-color: #131313;
+    background-color: hsl(0, 0%, 7%);
   }
   .btn {
     padding: 10px 16px;
@@ -92,7 +95,6 @@
     box-sizing: border-box;
     transform: translateY(0);
     transition: all .3s ease-in-out;
-    overflow: hidden;
     z-index: 2020;
   }
   .logo {
