@@ -6,6 +6,10 @@
       <span class="guide" @click="toggleSidebar"></span>
     </header>
 
+    <transition name="shadow-">
+      <div class="shadow" v-show="checkSearchResult" @click="hideSearchResult(false)"></div>
+    </transition>
+
     <side-bar></side-bar>
 
     <error-box index="main"></error-box>
@@ -32,13 +36,18 @@
         sideBar: Sidebar,
         searchBar: SearchBar,
     },
+    computed: {
+      checkSearchResult () {
+          return this.$store.getters.getSearchShadow;
+      }
+    },
     methods: {
         toggleSidebar () {
             eventEmitter.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
+        },
+        hideSearchResult (payload) {
+            eventEmitter.$emit('searchHide', payload)
         }
-    },
-    created () {
-
     }
   }
 </script>
@@ -127,6 +136,23 @@
       height: 100%;
       background-color: $rgba-255;
       mask: url($icon-guide) 50% 50% / contain no-repeat;
+    }
+  }
+  .shadow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.2s ease;
+    opacity: 1;
+    background: $rgba-50;
+    z-index: 2010;
+    &--enter,
+    &--leave-to {
+      opacity: 0;
     }
   }
 </style>

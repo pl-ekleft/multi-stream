@@ -11,8 +11,7 @@
         </keep-alive>
         <div class="form-search__btn" @click="sendingRequest"></div>
         <ul class="form-search-list form-search-list--scroll"
-            v-if="result"
-            @click="result=false"
+            v-if="showResult"
         >
             <li class="form-search-list__item"
                 v-for="(item, key) in result.items"
@@ -34,14 +33,21 @@
 </template>
 
 <script>
+    import { eventEmitter } from '../main.js'
+
     export default {
         name: "SearchBar",
         data() {
             return {
                 provider: 'youtube',
-                shadowShow: 0,
                 query: '',
-                result: false
+                result: false,
+                showResult: false
+            }
+        },
+        computed: {
+            checkSearchResult () {
+                return this.$store.getters.getSearchShadow;
             }
         },
         methods: {
@@ -53,20 +59,28 @@
                 } else {
                     this.$store.dispatch('setError', {text: 'Не удалось получить videoId', index: 'main'})
                 }
+                this.toggleResult(false);
+            },
+            clearSelectVideoUrl() {// очищаем выбранный url видео
+                this.$store.dispatch('clearSelectVideoUrl');
             },
             sendingRequest() {
                 if (this.provider === 'youtube' && this.query.length) {
                     this.$store.dispatch('search', this.query)
                         .then(() => {
                             this.result = this.$store.getters.getSearchData;
-                            if (!this.result.pageInfo.totalResults) {
-                                return this.$store.dispatch('setError', {
+                            if (this.result.pageInfo.totalResults) {
+                                this.toggleResult(true);
+                            } else {
+                                this.toggleResult(false);
+                                this.$store.dispatch('setError', {
                                     text: 'Поиск не дал результатов',
                                     index: 'main'
                                 })
                             }
                             // console.log('sendingRequest result:', this.result);
-                            /*eventEmitter.$emit('urlUpdated',{ // TODO: Тестово выводим первое видео в первое окно
+                            /* TODO: Тестово выводим первое видео в первое окно через вызов события
+                            eventEmitter.$emit('urlUpdated',{
                                 url:`https://www.youtube.com/embed/${this.result.items[0].id.videoId}`,
                                 chat: {
                                     show: 0
@@ -76,12 +90,19 @@
                         .catch(() => {
                         })
                 } else {
+                    this.toggleResult(false);
                     this.$store.dispatch('setError', {text: 'Поисковый запрос пуст', index: 'main'})
                 }
             },
-            clearSelectVideoUrl() {// очищаем выбранный url видео
-                this.$store.dispatch('clearSelectVideoUrl');
+            toggleResult(status) {
+                this.showResult = status; /* TODO: На сколько сильно это необходимо? */
+                this.$store.dispatch('setShadow', status);
             }
+        },
+        created () {
+            eventEmitter.$on('searchHide', (payload) => { // Прослушиваем событие searchHide
+                this.toggleResult(payload);
+            })
         }
     }
 </script>
@@ -164,7 +185,7 @@
             background-color: hsl(0, 0%, 7%);
             z-index: 2023;
             &--scroll {
-                max-height: 390px;
+                max-height: calc(100vh - 60px);
                 overflow-y: auto;
                 overflow-x: hidden;
                 @include scroll();
@@ -176,7 +197,6 @@
                 width: 210px;
                 margin: 3px;
                 &:hover {
-                    /*background-color: $rgba-255-19;*/
                     cursor: pointer;
                 }
             }
@@ -192,9 +212,6 @@
                         height: 100%;
                         font-size: 2.5rem;
                         line-height: 2.5rem;
-                        /*background: url($icon-plus) 50% 50% / contain no-repeat;*/
-                        /*background-color: $blue;
-                        mask: url($icon-plus) 50% 50% / contain no-repeat;*/
                         opacity: 0.9;
                         z-index: 2;
                     }
@@ -241,9 +258,6 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                /*&:hover {
-                    color: $rgba-255-74;
-                }*/
             }
         }
     }

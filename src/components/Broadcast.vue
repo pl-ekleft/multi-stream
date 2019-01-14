@@ -6,7 +6,7 @@
              :class="{
                  'broadcast--loading': win.url,
                  'broadcast--disabled': win.disabled,
-                 'broadcast--first': key === firstWindow && !win.disabled,
+                 'broadcast--first': win.index === firstWindow && !win.disabled,
                  'broadcast--hidden': win.index === hiddenWindow,
                  'broadcast--scale': hiddenWindow === 1,
                  'broadcast--flicker': checkSelectVideoUrl
@@ -35,12 +35,12 @@
                 ></div>
                 <div class="broadcast__btn broadcast__btn--expand"
                      title="Сделать основным"
-                     v-if="key !== firstWindow"
-                     @click="mainWindow(key)"
+                     v-if="win.index !== firstWindow"
+                     @click="mainWindow(win.index)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--close"
                      title="Удалить окно"
-                     @click="deleteBroadcast(key)"
+                     @click="deleteBroadcast(key,win.index)"
                 ></div>
             </div>
             <div class="broadcast__number" v-html="win.index"></div>
@@ -107,7 +107,7 @@
                     }
                 ],
                 windowsInterator: 0,
-                firstWindow: 0,
+                firstWindow: 1,
                 hiddenWindow: null,
             }
         },
@@ -136,8 +136,6 @@
 
                 /* Проверяем наличие show в payload и обновляем параметр отображение чата*/
                 if(payload.hasOwnProperty('show')) {// TODO: payload.hasOwnProperty('show') не лучшее решение
-                    // payload.findIndex('show')
-                    // payload.includes('show')
                     this.windows[key].chat.show = payload.chat.show;
                 }
 
@@ -176,14 +174,16 @@
                 this.windowsInterator++;
                 this.$set(this.windows, this.windowsInterator, {url: '', disabled: 1, chat: {url: '', show: 0}, index: obj.index+1}); // к массиву windows вставляем поле/ключ windowsInterator с default объектом
             },
-            deleteBroadcast(key) {
-                this.windowsInterator--;
+            deleteBroadcast(key,index) {
                 this.$delete(this.windows, key);
-                this.firstWindow = (this.windowsInterator>1?this.firstWindow:0); // контроль первого окна (при удалении)
+                this.windowsInterator--;
+                if(this.firstWindow === index) { // контроль первого окна (при удалении первого)
+                    this.mainWindow(this.windows[0].index);
+                }
                 this.hiddenWindow = (this.windowsInterator?this.hiddenWindow:null); // контроль скрытого окна (при удалении)
             },
-            mainWindow(key) {
-                this.firstWindow = key;
+            mainWindow(index) {
+                this.firstWindow = index;
             },
             toggleWindows(index) {
                 if(this.hiddenWindow === null) {
@@ -209,10 +209,8 @@
         created () {
             this.addBroadcast(); // вставляем окно добавления (по умолчанию он блокируется)
             eventEmitter.$on('urlUpdated', (payload) => { // Прослушиваем событие urlUpdated
-                const key = this.firstWindow;
-                // this.windows[key].url="https://player.twitch.tv/?channel=xairas_gaming";
-                // this.windows[key].url = "https://www.youtube.com/embed/bpp2KgRSuPQ";
-                // this.windows[key].chat.show = 1;
+                /* TODO: Реализовать возможность сохранять текущие окна в localStorage */
+                const key = 0; // ключ окна для вставки адреса
                 payload = payload||{ url: 'https://www.youtube.com/embed/oI3GdbsbDxk', chat: { show: 1 } };
                 this.lineProcessing(key,payload);
             })
@@ -222,8 +220,8 @@
 
 <style lang="scss" scoped>
     @keyframes flicker {
-        0% {box-shadow: 0 0 0 1px $blue;}
-        100% {box-shadow: 0 0 15px 1px $blue;}
+        0% {box-shadow: 0 0 0 1px $blue-50;}
+        100% {box-shadow: 0 0 15px 1px $blue-50;}
     }
     .wrapper {
         display: flex;
@@ -242,7 +240,6 @@
         display: inline-block;
         flex-grow: 1;
         width: calc(25% - 20px);
-        /*min-width: calc(25% - 20px);*/
         height: calc(40vh - 30px);
         font-size: 0;
         line-height: 0;
@@ -501,7 +498,6 @@
                 height: 100%;
                 color: $blue;
                 background-color: $rgba-50;
-                text-shadow: 0 0 10px 5px $blue;
                 font-size: 2.5rem;
                 line-height: 2.5rem;
                 box-sizing: border-box;
@@ -509,7 +505,7 @@
                 z-index: 5;
             }
             &:hover {
-                animation-play-state: paused;
+                /*animation-play-state: paused;*/
                 &:before {
                     content: 'Выбрать это окно';
                     color: $rgba-255;
