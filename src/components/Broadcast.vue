@@ -101,7 +101,7 @@
                             url: '',
                             show: 1
                         },
-                        disabled: 0,
+                        disabled: 1,
                         index: 1,
                         url: '',
                     }
@@ -147,6 +147,7 @@
                 if(match.provider === 'youtube') {
                     let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
                     if (match.id) {
+                        /* TODO: М.б. стоит применить некий $set (для подобных целей)? */
                         this.windows[key].url = `https://www.youtube.com/embed/${match.id}${params}`;
                         this.windows[key].chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`;
                     } else {
@@ -179,6 +180,7 @@
 
                 this.settings.windowsInterator++;
                 this.$set(this.windows, this.settings.windowsInterator, {chat: {url: '', show: 0}, disabled: 1, index: obj.index+1, url: ''}); // к массиву windows вставляем поле/ключ windowsInterator с объектом по умолчанию
+                // $set(объект, в который будет добавляться новое свойство / имя нового свойства / значение нового свойства)
                 this.updateLocalStorage('settings');
             },
             deleteBroadcast(key,index) {
@@ -242,7 +244,7 @@
             }
         },
         created () {
-            if(this.localWindows === null) {// если windows не найден в localStorage
+            if(!localStorage.windows) {// если windows не найден в localStorage
                 this.addBroadcast(); // вставляем окно добавления (по умолчанию оно блокируется)
             }
 

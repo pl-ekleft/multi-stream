@@ -102,6 +102,7 @@
             },
             removeWindowsInStorage () {
                 eventEmitter.$emit('cleanUpdate') // Вызываем событие cleanUpdate
+                this.toggleSidebar()
             }
         },
         watch: {
