@@ -6,9 +6,9 @@
              :class="{
                  'broadcast--loading': win.url,
                  'broadcast--disabled': win.disabled,
-                 'broadcast--first': win.index === firstWindow && !win.disabled,
-                 'broadcast--hidden': win.index === hiddenWindow,
-                 'broadcast--scale': hiddenWindow === 1,
+                 'broadcast--first': win.index === settings.firstWindow && !win.disabled,
+                 'broadcast--hidden': win.index === settings.hiddenWindow,
+                 'broadcast--scale': settings.hiddenWindow === 1,
                  'broadcast--flicker': checkSelectVideoUrl
              }"
              @click="selectWindow(key, checkSelectVideoUrl)"
@@ -20,12 +20,12 @@
             <div class="broadcast__bar">
                 <div class="broadcast__btn broadcast__btn--maximize"
                      title="Развернуть окно добавления"
-                     v-if="hiddenWindow !== null"
+                     v-if="settings.hiddenWindow !== null"
                      @click="toggleWindows(win.index)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--minimize"
                      title="Свернуть окно"
-                     v-if="win.disabled && hiddenWindow === null"
+                     v-if="win.disabled && settings.hiddenWindow === null"
                      @click="toggleWindows(win.index)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--chat"
@@ -35,7 +35,7 @@
                 ></div>
                 <div class="broadcast__btn broadcast__btn--expand"
                      title="Сделать основным"
-                     v-if="win.index !== firstWindow"
+                     v-if="win.index !== settings.firstWindow"
                      @click="mainWindow(win.index)"
                 ></div>
                 <div class="broadcast__btn broadcast__btn--close"
@@ -97,18 +97,22 @@
             return {
                 windows: [
                     {
-                        index: 1,
-                        url: '',
-                        disabled: 0,
                         chat: {
                             url: '',
                             show: 1
-                        }
+                        },
+                        disabled: 0,
+                        index: 1,
+                        url: '',
                     }
                 ],
-                windowsInterator: 0,
-                firstWindow: 1,
-                hiddenWindow: null,
+                localWindows: null,
+                settings: {
+                    windowsInterator: 0,
+                    firstWindow: 1,
+                    hiddenWindow: null
+                },
+                localSettings: null
             }
         },
         components: {
@@ -139,7 +143,7 @@
                     this.windows[key].chat.show = payload.chat.show;
                 }
 
-                /* Проверяем url и преобразовывваем */
+                /* Проверяем url и преобразуем */
                 if(match.provider === 'youtube') {
                     let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
                     if (match.id) {
@@ -167,53 +171,91 @@
                         return false;
                     }
                 }
+                this.updateLocalStorage('windows'); /* TODO: Сомнительное решение, нет полной реактивности windows */
             },
-            addBroadcast() {
-                let obj = this.windows[this.windowsInterator];
+            addBroadcast() { // quantity
+                let obj = this.windows[this.settings.windowsInterator];
                     obj.disabled = 0; // снимаем блокировку с последнего окна
-                this.windowsInterator++;
-                this.$set(this.windows, this.windowsInterator, {url: '', disabled: 1, chat: {url: '', show: 0}, index: obj.index+1}); // к массиву windows вставляем поле/ключ windowsInterator с default объектом
+
+                this.settings.windowsInterator++;
+                this.$set(this.windows, this.settings.windowsInterator, {chat: {url: '', show: 0}, disabled: 1, index: obj.index+1, url: ''}); // к массиву windows вставляем поле/ключ windowsInterator с объектом по умолчанию
+                this.updateLocalStorage('settings');
             },
             deleteBroadcast(key,index) {
                 this.$delete(this.windows, key);
-                this.windowsInterator--;
-                if(this.firstWindow === index) { // контроль первого окна (при удалении первого)
+                this.settings.windowsInterator--;
+                if(this.settings.firstWindow === index) { // контроль первого окна (при удалении первого)
                     this.mainWindow(this.windows[0].index);
                 }
-                this.hiddenWindow = (this.windowsInterator?this.hiddenWindow:null); // контроль скрытого окна (при удалении)
+                this.settings.hiddenWindow = (this.settings.windowsInterator?this.settings.hiddenWindow:null); // контроль скрытого окна (при удалении)
+                this.updateLocalStorage('settings');
             },
             mainWindow(index) {
-                this.firstWindow = index;
+                this.settings.firstWindow = index;
+                this.updateLocalStorage('settings');
             },
             toggleWindows(index) {
-                if(this.hiddenWindow === null) {
-                    this.hiddenWindow = index;
+                if(this.settings.hiddenWindow === null) {
+                    this.settings.hiddenWindow = index;
                 } else {
-                    this.hiddenWindow = null;
+                    this.settings.hiddenWindow = null;
                 }
+                this.updateLocalStorage('settings');
             },
             toggleChat(key) {
                 let chat = this.windows[key].chat;
                     chat.show = !chat.show;
+                this.updateLocalStorage('windows');
             },
             selectWindow(key,url) {// выбор окна для вставки url из поисковой выдачи
                 if(url) {
                     this.lineProcessing(key, { url: url });
                     this.$store.dispatch('clearSelectVideoUrl');
                 }
+            },
+            removeLocalStorage () { // переназначаем windows в state на значениея по умолчанию
+                /* TODO: Плохое решение по сбросу данных до дефолтных */
+                this.windows = [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}];
+                this.settings = {windowsInterator: 0, firstWindow: 1, hiddenWindow: null};
+                this.addBroadcast();
+            },
+            updateLocalStorage (name) { // перезаписываем windows (предварительно переведя в строку)
+                /* TODO: Приходится постоянно вызывать this.updateLocalStorage('settings') - это не круто */
+                localStorage.setItem(name, JSON.stringify(this[name]));
+            }
+        },
+        watch: {
+            windows(localWindows) { // следим за windows и обновляем значение в localStorage (предварительно переведя в строку)
+                localStorage.windows = JSON.stringify(localWindows);
+            },
+            settings(localSettings) {
+                localStorage.settings = JSON.stringify(localSettings);
             }
         },
         mounted () {
-
+            if (localStorage.windows) {// перезаписываем windows значением из localStorage (предварительно переведя в объект)
+                /* TODO: Рецепт реактивного localStorage( https://ru.vuejs.org/v2/cookbook/client-side-storage.html ) */
+                this.windows = JSON.parse(localStorage.windows);
+            }
+            if (localStorage.settings) {
+                this.settings = JSON.parse(localStorage.settings);
+            }
         },
         created () {
-            this.addBroadcast(); // вставляем окно добавления (по умолчанию он блокируется)
-            eventEmitter.$on('urlUpdated', (payload) => { // Прослушиваем событие urlUpdated
-                /* TODO: Реализовать возможность сохранять текущие окна в localStorage */
+            if(this.localWindows === null) {// если windows не найден в localStorage
+                this.addBroadcast(); // вставляем окно добавления (по умолчанию оно блокируется)
+            }
+
+            eventEmitter.$on('urlUpdate', (payload) => { // Прослушиваем событие urlUpdate
+                /* TODO: Подумать, для каких целей нужно данное событие */
                 const key = 0; // ключ окна для вставки адреса
                 payload = payload||{ url: 'https://www.youtube.com/embed/oI3GdbsbDxk', chat: { show: 1 } };
                 this.lineProcessing(key,payload);
-            })
+            });
+
+            eventEmitter.$on('cleanUpdate', () => { // Событие для сброса windows в state
+                this.removeLocalStorage();
+            });
         }
     }
 </script>

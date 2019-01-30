@@ -80,7 +80,7 @@
                             }
                             // console.log('sendingRequest result:', this.result);
                             /* TODO: Тестово выводим первое видео в первое окно через вызов события
-                            eventEmitter.$emit('urlUpdated',{
+                            eventEmitter.$emit('urlUpdate',{
                                 url:`https://www.youtube.com/embed/${this.result.items[0].id.videoId}`,
                                 chat: {
                                     show: 0

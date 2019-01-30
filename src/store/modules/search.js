@@ -1,6 +1,7 @@
 import searchYoutube from 'youtube-api-v3-search'
 
 export default {
+    namespaced: false,
     state: {
         selectVideoUrl: false,
         searchData: {},

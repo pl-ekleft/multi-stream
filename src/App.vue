@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <header class="header">
-      <router-link to="/" class="logo"></router-link>
+      <router-link :to="{name: 'home'}" class="logo"></router-link>
       <search-bar></search-bar>
       <span class="guide" @click="toggleSidebar"></span>
     </header>
