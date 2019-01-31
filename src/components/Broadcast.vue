@@ -251,7 +251,7 @@
         },
         mounted () {
             if (localStorage.windows) {// перезаписываем windows значением из localStorage (предварительно переведя в объект)
-                /* TODO: Рецепт реактивного localStorage( https://ru.vuejs.org/v2/cookbook/client-side-storage.html ) */
+                /* TODO: Рецепт https://ru.vuejs.org/v2/cookbook/client-side-storage.html */
                 this.windows = JSON.parse(localStorage.windows);
             }
             if (localStorage.settings) {
@@ -259,7 +259,6 @@
             }
         },
         created () {
-            console.log(this);
             if(!localStorage.windows) {// если windows не найден в localStorage
                 this.addBroadcast(); // вставляем окно добавления (по умолчанию оно блокируется)
             }
