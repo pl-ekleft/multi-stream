@@ -1,280 +1,293 @@
 <template>
-    <div class="wrapper">
-        <div class="broadcast"
-             v-for="(win, key) in windows"
-             :key="key"
-             :class="{
-                 'broadcast--loading': win.url,
-                 'broadcast--disabled': win.disabled,
-                 'broadcast--first': win.index === settings.firstWindow && !win.disabled,
-                 'broadcast--hidden': win.index === settings.hiddenWindow,
-                 'broadcast--scale': settings.hiddenWindow === 1,
-                 'broadcast--flicker': checkSelectVideoUrl
-             }"
-             @click="selectWindow(key, checkSelectVideoUrl)"
-        >
-            <div class="broadcast__append"
-                 v-if="win.disabled"
-                 @click="addBroadcast"
-            ></div>
-            <div class="broadcast__bar">
-                <div class="broadcast__btn broadcast__btn--maximize"
-                     title="Развернуть окно добавления"
-                     v-if="settings.hiddenWindow !== null"
-                     @click="toggleWindows(win.index)"
-                ></div>
-                <div class="broadcast__btn broadcast__btn--minimize"
-                     title="Свернуть окно"
-                     v-if="win.disabled && settings.hiddenWindow === null"
-                     @click="toggleWindows(win.index)"
-                ></div>
-                <div class="broadcast__btn broadcast__btn--chat"
-                     title="Показать/скрыть чат"
-                     v-if="win.chat.url.length"
-                     @click="toggleChat(key)"
-                ></div>
-                <div class="broadcast__btn broadcast__btn--expand"
-                     title="Сделать основным"
-                     v-if="win.index !== settings.firstWindow"
-                     @click="mainWindow(win.index)"
-                ></div>
-                <div class="broadcast__btn broadcast__btn--close"
-                     title="Удалить окно"
-                     @click="deleteBroadcast(key,win.index)"
-                ></div>
-            </div>
-            <div class="broadcast__number" v-html="win.index"></div>
-            <div class="broadcast__video">
-                <iframe
-                        width="560"
-                        height="315"
-                        :src="win.url"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                ></iframe>
-                <transition name="broadcast__chat-">
-                    <div class="broadcast__chat"
-                         v-show="win.chat.show"
-                    >
-                        <iframe
-                                width="240"
-                                height="315"
-                                :src="win.chat.url"
-                                frameborder="0"
-                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                        ></iframe>
-                    </div>
-                </transition>
-            </div>
-            <div class="broadcast__panel">
-                <keep-alive>
-                    <input type="text"
-                           placeholder="Вставьте URL"
-                           v-model.trim.lazy="win.url"
-                           @change="lineProcessing(key)"
-                    >
-                </keep-alive>
-                <div class="broadcast__panel-enter"
-                     title="Ввод"
-                     @click="lineProcessing(key)"
-                ></div>
-            </div>
-            <error-box :index="key"></error-box>
-        </div>
+  <div class="wrapper">
+    <div
+      v-for="(win, key) in windows"
+      :key="key"
+      class="broadcast"
+      :class="{
+        'broadcast--loading': win.url,
+        'broadcast--disabled': win.disabled,
+        'broadcast--first': win.index === settings.firstWindow && !win.disabled,
+        'broadcast--hidden': win.index === settings.hiddenWindow,
+        'broadcast--scale': settings.hiddenWindow === 1,
+        'broadcast--flicker': checkSelectVideoUrl
+      }"
+      @click="selectWindow(key, checkSelectVideoUrl)"
+    >
+      <div
+        v-if="win.disabled"
+        class="broadcast__append"
+        @click="addBroadcast"
+      />
+      <div class="broadcast__bar">
+        <div
+          v-if="settings.hiddenWindow !== null"
+          class="broadcast__btn broadcast__btn--maximize"
+          title="Развернуть окно добавления"
+          @click="toggleWindows(win.index)"
+        />
+        <div
+          v-if="win.disabled && settings.hiddenWindow === null"
+          class="broadcast__btn broadcast__btn--minimize"
+          title="Свернуть окно"
+          @click="toggleWindows(win.index)"
+        />
+        <div
+          v-if="win.chat.url.length"
+          class="broadcast__btn broadcast__btn--chat"
+          title="Показать/скрыть чат"
+          @click="toggleChat(key)"
+        />
+        <div
+          v-if="win.index !== settings.firstWindow"
+          class="broadcast__btn broadcast__btn--expand"
+          title="Сделать основным"
+          @click="mainWindow(win.index)"
+        />
+        <div
+          class="broadcast__btn broadcast__btn--close"
+          title="Удалить окно"
+          @click="deleteBroadcast(key,win.index)"
+        />
+      </div>
+      <div
+        class="broadcast__number"
+        v-html="win.index"
+      />
+      <div class="broadcast__video">
+        <iframe
+          width="560"
+          height="315"
+          :src="win.url"
+          frameborder="0"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        />
+        <transition name="broadcast__chat-">
+          <div
+            v-show="win.chat.show"
+            class="broadcast__chat"
+          >
+            <iframe
+              width="240"
+              height="315"
+              :src="win.chat.url"
+              frameborder="0"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            />
+          </div>
+        </transition>
+      </div>
+      <div class="broadcast__panel">
+        <keep-alive>
+          <input
+            v-model.trim.lazy="win.url"
+            type="text"
+            placeholder="Вставьте URL"
+            @change="lineProcessing(key)"
+          >
+        </keep-alive>
+        <div
+          class="broadcast__panel-enter"
+          title="Ввод"
+          @click="lineProcessing(key)"
+        />
+      </div>
+      <error-box :index="key" />
     </div>
+  </div>
 </template>
 
 <script>
-    import { eventEmitter } from '../main.js'
-    import urlParser from 'js-video-url-parser'
-    import Error from './Error.vue'
+import { eventEmitter } from '../main.js'
+import urlParser from 'js-video-url-parser'
+import Error from './Error.vue'
 
-    export default {
-        name: "Broadcast",
-        data() {
-            return {
-                windows: [
-                    {
-                        chat: {
-                            url: '',
-                            show: 1
-                        },
-                        disabled: 1,
-                        index: 1,
-                        url: '',
-                    }
-                ],
-                settings: {
-                    windowsInterator: 0, // quantity
-                    firstWindow: 1,
-                    hiddenWindow: null
-                }
-            }
+export default {
+  name: 'Broadcast',
+  components: {
+    errorBox: Error,
+  },
+  data () {
+    return {
+      windows: [
+        {
+          chat: {
+            url: '',
+            show: 1,
+          },
+          disabled: 1,
+          index: 1,
+          url: '',
         },
-        components: {
-            errorBox: Error
-        },
-        computed: {
-            checkSelectVideoUrl() {
-                //console.log('checkSelectVideoUrl', this.$store.getters.getSelectVideoUrl);
-                return this.$store.getters.getSelectVideoUrl;
-            }
-        },
-        methods: {
-            lineProcessing(key,payload=false) {
-                const thisWindow = this.windows[key];
-                const url = payload.url||thisWindow.url;
-                const match = urlParser.parse(url);
-                //console.log('lineProcessing',payload, match);
-
-                /* Проверка на наличие url */
-                if (match === undefined) {
-                    this.$store.dispatch('setError', {text: 'Введенный адрес ресурса не поддерживается', index: key});
-                    thisWindow.url = '';
-                    thisWindow.chat.url = '';
-                }
-
-                /* Проверяем наличие show в payload и обновляем параметр отображение чата*/
-                if(payload.hasOwnProperty('show')) {// TODO: payload.hasOwnProperty('show') не лучшее решение
-                    thisWindow.chat.show = payload.chat.show;
-                }
-
-                /* Проверяем url и преобразуем */
-                if(match.provider === 'youtube') {
-                    let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
-                    if (match.id) {
-                        thisWindow.url = `https://www.youtube.com/embed/${match.id}${params}`;
-                        thisWindow.chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`;
-                    } else {
-                        this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
-                        thisWindow.url = '';
-                        thisWindow.chat.url = '';
-                    }
-                }
-                if(match.provider === 'twitch') {
-                    let params = '&autoplay=true'+(!key?'&muted=false':'&muted=true');
-                    if (match.channel && match.channel !== 'directory') {
-                        thisWindow.url = `https://player.twitch.tv/?channel=${match.channel}${params}`;
-                        thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
-                    } else if (match.id) {
-                        thisWindow.url = `https://player.twitch.tv/?video=${match.id}${params}`;
-                        thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
-                    } else {
-                        this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
-                        thisWindow.url = '';
-                        thisWindow.chat.url = '';
-                    }
-                }
-
-                this.$set(this.windows, key, thisWindow); // применяем изменения к основному объекту
-            },
-            addBroadcast() {
-                const thisSettings = this.settings;
-                let obj = this.windows[thisSettings.windowsInterator];
-                    obj.disabled = 0; // снимаем блокировку с последнего окна
-
-                thisSettings.windowsInterator++;
-
-                this.$set(this.windows, thisSettings.windowsInterator, {chat: {url: '', show: 0}, disabled: 1, index: obj.index+1, url: ''}); // добавляем дефолтный объект (окно)
-
-                //this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
-            },
-            deleteBroadcast(key,index) {
-                this.$delete(this.windows, key);
-
-                let thisSettings = this.settings;
-                    thisSettings.windowsInterator--;
-
-                if(thisSettings.firstWindow === index) { // контроль первого окна (при удалении первого)
-                    this.mainWindow(this.windows[0].index);
-                }
-                if(!thisSettings.windowsInterator) {
-                    thisSettings.hiddenWindow = null; // контроль скрытого окна (при удалении)
-                }
-
-                //this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
-            },
-            mainWindow(index) {
-                const thisSettings = this.settings;
-                      thisSettings.firstWindow = index;
-
-                //this.$set(this.settings, 'firstWindow', thisSettings.firstWindow);
-            },
-            toggleWindows(index) {
-                const thisSettings = this.settings;
-                if(thisSettings.hiddenWindow === null) {
-                    thisSettings.hiddenWindow = index;
-                } else {
-                    thisSettings.hiddenWindow = null;
-                }
-                //this.$set(this.settings, 'hiddenWindow', thisSettings.hiddenWindow);
-            },
-            toggleChat(key) {
-                const thisWindow = this.windows[key];
-                let chat = thisWindow.chat;
-                    chat.show = !chat.show;
-
-                this.$set(this.windows, key, thisWindow);
-            },
-            selectWindow(key,url) {// выбор окна для вставки url из поисковой выдачи
-                if(url) {
-                    this.lineProcessing(key, { url: url });
-                    this.$store.dispatch('clearSelectVideoUrl');
-                }
-            },
-            removeLocalStorage () { // переназначаем windows в state на значениея по умолчанию
-                /* TODO: Плохое решение по сбросу данных до дефолтных */
-                //this.$set(this, 'windows', [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}]);
-                //this.$set(this, 'settings', {windowsInterator: 0, firstWindow: 1, hiddenWindow: null});
-                this.windows = [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}];
-                this.settings = {windowsInterator: 0, firstWindow: 1, hiddenWindow: null};
-                this.addBroadcast();
-            }
-        },
-        watch: {
-            windows(localWindows) { // следим за windows и обновляем значение в localStorage (предварительно переведя в строку)
-                localStorage.windows = JSON.stringify(localWindows);
-            },
-            /*settings(localSettings) {
+      ],
+      settings: {
+        windowsInterator: 0, // quantity
+        firstWindow: 1,
+        hiddenWindow: null,
+      },
+    }
+  },
+  computed: {
+    checkSelectVideoUrl () {
+      // console.log('checkSelectVideoUrl', this.$store.getters.getSelectVideoUrl);
+      return this.$store.getters.getSelectVideoUrl
+    },
+  },
+  watch: {
+    windows (localWindows) { // следим за windows и обновляем значение в localStorage (предварительно переведя в строку)
+      localStorage.windows = JSON.stringify(localWindows)
+    },
+    /* settings(localSettings) {
                 // TODO: Понять причину отказа работы this.$set(this.settings, 'name', thisSettings.name);
                 localStorage.settings = JSON.stringify(localSettings);
-            },*/
-            settings: {
-                // TODO: Пришлось запустить глубокое слежение из-за каприза this.$set
-                handler(localSettings){ // глубокое слежение
-                    localStorage.settings = JSON.stringify(localSettings);
-                },
-                deep: true
-            }
-        },
-        mounted () {
-            if (localStorage.windows) {// перезаписываем windows значением из localStorage (предварительно переведя в объект)
-                /* TODO: Рецепт https://ru.vuejs.org/v2/cookbook/client-side-storage.html */
-                this.windows = JSON.parse(localStorage.windows);
-            }
-            if (localStorage.settings) {
-                this.settings = JSON.parse(localStorage.settings);
-            }
-        },
-        created () {
-            if(!localStorage.windows) {// если windows не найден в localStorage
-                this.addBroadcast(); // вставляем окно добавления (по умолчанию оно блокируется)
-            }
-
-            eventEmitter.$on('urlUpdate', (payload) => { // Прослушиваем событие urlUpdate
-                /* TODO: Подумать, для каких целей нужно данное событие */
-                const key = 0; // ключ окна для вставки адреса
-                payload = payload||{ url: 'https://www.youtube.com/embed/oI3GdbsbDxk', chat: { show: 1 } };
-                this.lineProcessing(key,payload);
-            });
-
-            eventEmitter.$on('cleanUpdate', () => { // Событие для сброса windows в state
-                this.removeLocalStorage();
-            });
-        }
+            }, */
+    settings: {
+      // TODO: Пришлось запустить глубокое слежение из-за каприза this.$set
+      handler (localSettings) { // глубокое слежение
+        localStorage.settings = JSON.stringify(localSettings)
+      },
+      deep: true,
+    },
+  },
+  mounted () {
+    if (localStorage.windows) { // перезаписываем windows значением из localStorage (предварительно переведя в объект)
+      /* TODO: Рецепт https://ru.vuejs.org/v2/cookbook/client-side-storage.html */
+      this.windows = JSON.parse(localStorage.windows)
     }
+    if (localStorage.settings) {
+      this.settings = JSON.parse(localStorage.settings)
+    }
+  },
+  created () {
+    if (!localStorage.windows) { // если windows не найден в localStorage
+      this.addBroadcast() // вставляем окно добавления (по умолчанию оно блокируется)
+    }
+
+    eventEmitter.$on('urlUpdate', (payload) => { // Прослушиваем событие urlUpdate
+      /* TODO: Подумать, для каких целей нужно данное событие */
+      const key = 0 // ключ окна для вставки адреса
+      payload = payload || { url: 'https://www.youtube.com/embed/oI3GdbsbDxk', chat: { show: 1 } }
+      this.lineProcessing(key, payload)
+    })
+
+    eventEmitter.$on('cleanUpdate', () => { // Событие для сброса windows в state
+      this.removeLocalStorage()
+    })
+  },
+  methods: {
+    lineProcessing (key, payload = false) {
+      const thisWindow = this.windows[key]
+      const url = payload.url || thisWindow.url
+      const match = urlParser.parse(url)
+      // console.log('lineProcessing',payload, match);
+
+      /* Проверка на наличие url */
+      if (match === undefined) {
+        this.$store.dispatch('setError', { text: 'Введенный адрес ресурса не поддерживается', index: key })
+        thisWindow.url = ''
+        thisWindow.chat.url = ''
+      }
+
+      /* Проверяем наличие show в payload и обновляем параметр отображение чата */
+      if (payload.hasOwnProperty('show')) { // TODO: payload.hasOwnProperty('show') не лучшее решение
+        thisWindow.chat.show = payload.chat.show
+      }
+
+      /* Проверяем url и преобразуем */
+      if (match.provider === 'youtube') {
+        let params = '?autoplay=1' + (!key ? '&mute=0' : '&mute=1')
+        if (match.id) {
+          thisWindow.url = `https://www.youtube.com/embed/${match.id}${params}`
+          thisWindow.chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`
+        } else {
+          this.$store.dispatch('setError', { text: 'Проверьте URL введенного YouTube канала', index: key })
+          thisWindow.url = ''
+          thisWindow.chat.url = ''
+        }
+      }
+      if (match.provider === 'twitch') {
+        let params = '&autoplay=true' + (!key ? '&muted=false' : '&muted=true')
+        if (match.channel && match.channel !== 'directory') {
+          thisWindow.url = `https://player.twitch.tv/?channel=${match.channel}${params}`
+          thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`
+        } else if (match.id) {
+          thisWindow.url = `https://player.twitch.tv/?video=${match.id}${params}`
+          thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`
+        } else {
+          this.$store.dispatch('setError', { text: 'Проверьте URL введенного Twitch канала', index: key })
+          thisWindow.url = ''
+          thisWindow.chat.url = ''
+        }
+      }
+
+      this.$set(this.windows, key, thisWindow) // применяем изменения к основному объекту
+    },
+    addBroadcast () {
+      const thisSettings = this.settings
+      let obj = this.windows[thisSettings.windowsInterator]
+      obj.disabled = 0 // снимаем блокировку с последнего окна
+
+      thisSettings.windowsInterator++
+
+      this.$set(this.windows, thisSettings.windowsInterator, { chat: { url: '', show: 0 }, disabled: 1, index: obj.index + 1, url: '' }) // добавляем дефолтный объект (окно)
+
+      // this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
+    },
+    deleteBroadcast (key, index) {
+      this.$delete(this.windows, key)
+
+      let thisSettings = this.settings
+      thisSettings.windowsInterator--
+
+      if (thisSettings.firstWindow === index) { // контроль первого окна (при удалении первого)
+        this.mainWindow(this.windows[0].index)
+      }
+      if (!thisSettings.windowsInterator) {
+        thisSettings.hiddenWindow = null // контроль скрытого окна (при удалении)
+      }
+
+      // this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
+    },
+    mainWindow (index) {
+      const thisSettings = this.settings
+      thisSettings.firstWindow = index
+
+      // this.$set(this.settings, 'firstWindow', thisSettings.firstWindow);
+    },
+    toggleWindows (index) {
+      const thisSettings = this.settings
+      if (thisSettings.hiddenWindow === null) {
+        thisSettings.hiddenWindow = index
+      } else {
+        thisSettings.hiddenWindow = null
+      }
+      // this.$set(this.settings, 'hiddenWindow', thisSettings.hiddenWindow);
+    },
+    toggleChat (key) {
+      const thisWindow = this.windows[key]
+      let chat = thisWindow.chat
+      chat.show = !chat.show
+
+      this.$set(this.windows, key, thisWindow)
+    },
+    selectWindow (key, url) { // выбор окна для вставки url из поисковой выдачи
+      if (url) {
+        this.lineProcessing(key, { url: url })
+        this.$store.dispatch('clearSelectVideoUrl')
+      }
+    },
+    removeLocalStorage () { // переназначаем windows в state на значениея по умолчанию
+      /* TODO: Плохое решение по сбросу данных до дефолтных */
+      // this.$set(this, 'windows', [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}]);
+      // this.$set(this, 'settings', {windowsInterator: 0, firstWindow: 1, hiddenWindow: null});
+      this.windows = [{ chat: { url: '', show: 1 }, disabled: 0, index: 1, url: '' }]
+      this.settings = { windowsInterator: 0, firstWindow: 1, hiddenWindow: null }
+      this.addBroadcast()
+    },
+  },
+}
 </script>
 
 <style lang="scss" scoped>

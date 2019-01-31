@@ -1,127 +1,152 @@
 <template>
-    <div class="sidebar" v-show="sidebarShowHold">
-        <transition name="sidebar__wrapper-">
-            <div class="sidebar__wrapper" v-show="sidebarShow">
-                <div class="sidebar__header">
-                    <span class="guide" @click="toggleSidebar"></span>
-                </div>
-                <div class="sidebar__content sidebar__content--scroll">
-                    <div class="sidebar-group">
-                        <div class="sidebar-group__title">
-                            Тестовый функционал
-                        </div>
-                        <div class="sidebar-group__item" @click="insertVideo">
-                            <span>Показать тестовое видео</span>
-                        </div>
-                        <div class="sidebar-group__item" @click="openError">
-                            <span>Показать ошибку</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="sidebar__content sidebar__content--scroll">
-                    <div class="sidebar-group">
-                        <div class="sidebar-group__title">
-                            Управление хранилищем
-                        </div>
-                        <div class="sidebar-group__item" @click="removeWindowsInStorage">
-                            <span>Удалить сохранённые данные</span>
-                        </div>
-                    </div>
-                </div>
-                <div v-if="false" class="sidebar__content sidebar__content--scroll">
-                    <div class="sidebar-group">
-                        <div class="sidebar-group__title">
-                            Разделы меню
-                        </div>
-                        <!--<div class="sidebar-group__item" @click="toggleSidebar">-->
-                        <!--<router-link :to="{name: 'history'}">Показать историю</router-link>-->
-                        <!--</div>-->
-                        <router-link
-                                v-for="(item, key) in menuList"
-                                :key="key"
-                                :to="{name: 'history'}"
-                                @click.native="toggleSidebar"
-                                tag="div"
-                                class="sidebar-group__item"
-                                active-class="active"
-                        >
-                            <a>{{ item.text }}</a>
-                        </router-link>
-                    </div>
-                </div>
-                <div class="sidebar__footer">
-                    Ресурс позволяет пользователю одновременно просматривать несколько стримов или видео с YouTube и Twitch.
-                </div>
-                <div class="sidebar__copyright">
-                    © 2018 Levin Pavel, MIT
-                </div>
+  <div
+    v-show="sidebarShowHold"
+    class="sidebar"
+  >
+    <transition name="sidebar__wrapper-">
+      <div
+        v-show="sidebarShow"
+        class="sidebar__wrapper"
+      >
+        <div class="sidebar__header">
+          <span
+            class="guide"
+            @click="toggleSidebar"
+          />
+        </div>
+        <div class="sidebar__content sidebar__content--scroll">
+          <div class="sidebar-group">
+            <div class="sidebar-group__title">
+              Тестовый функционал
             </div>
-        </transition>
-        <transition name="sidebar__shadow-">
-            <div class="sidebar__shadow" v-show="shadowShow" @click="toggleSidebar"></div>
-        </transition>
-    </div>
+            <div
+              class="sidebar-group__item"
+              @click="insertVideo"
+            >
+              <span>Показать тестовое видео</span>
+            </div>
+            <div
+              class="sidebar-group__item"
+              @click="openError"
+            >
+              <span>Показать ошибку</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar__content sidebar__content--scroll">
+          <div class="sidebar-group">
+            <div class="sidebar-group__title">
+              Управление хранилищем
+            </div>
+            <div
+              class="sidebar-group__item"
+              @click="removeWindowsInStorage"
+            >
+              <span>Удалить сохранённые данные</span>
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="false"
+          class="sidebar__content sidebar__content--scroll"
+        >
+          <div class="sidebar-group">
+            <div class="sidebar-group__title">
+              Разделы меню
+            </div>
+            <!--<div class="sidebar-group__item" @click="toggleSidebar">-->
+            <!--<router-link :to="{name: 'history'}">Показать историю</router-link>-->
+            <!--</div>-->
+            <router-link
+              v-for="(item, key) in menuList"
+              :key="key"
+              :to="{name: 'history'}"
+              tag="div"
+              class="sidebar-group__item"
+              active-class="active"
+              @click.native="toggleSidebar"
+            >
+              <a>{{ item.text }}</a>
+            </router-link>
+          </div>
+        </div>
+        <div class="sidebar__footer">
+          Ресурс позволяет пользователю одновременно просматривать несколько стримов или видео с YouTube и Twitch.
+        </div>
+        <div class="sidebar__copyright">
+          © 2018 Levin Pavel, MIT
+        </div>
+      </div>
+    </transition>
+    <transition name="sidebar__shadow-">
+      <div
+        v-show="shadowShow"
+        class="sidebar__shadow"
+        @click="toggleSidebar"
+      />
+    </transition>
+  </div>
 </template>
 
 <script>
-    import { mapGetters } from 'vuex'
-    import { eventEmitter } from '../main.js'
+import { mapGetters } from 'vuex'
+import { eventEmitter } from '../main.js'
 
-    export default {
-        name: "Sidebar",
-        data() {
-            return {
-                sidebarShowHold: 0,
-                sidebarShow: 0,
-                shadowShow: 0,
-            }
-        },
-        computed: {
-            ...mapGetters('menu', {
-                menuList: 'items'
-            })
-        },
-        methods: {
-            toggleSidebar() {
-                this.sidebarShow = !this.sidebarShow;
-                this.shadowShow = !this.shadowShow;
-
-                if(this.sidebarShow) {
-                    document.querySelector("html").setAttribute('class','hide-scroll')
-                } else {
-                    document.querySelector("html").removeAttribute('class')
-                }
-            },
-            insertVideo () { // вставляем видео - тест
-                eventEmitter.$emit('urlUpdate') // Вызываем событие urlUpdate
-                this.toggleSidebar()
-            },
-            openError () { // открываем ошибку - тест
-                this.$store.dispatch('setError', {text: 'Пример общей ошибки', index:'main'})
-                this.toggleSidebar()
-            },
-            removeWindowsInStorage () {
-                eventEmitter.$emit('cleanUpdate') // Вызываем событие cleanUpdate
-                this.toggleSidebar()
-            }
-        },
-        watch: {
-            sidebarShow () {
-                if(this.sidebarShowHold) {
-                    setTimeout(() => {
-                        this.sidebarShowHold = !this.sidebarShowHold
-                    },200) // время равное времени transition
-                } else {
-                    this.sidebarShowHold = !this.sidebarShowHold
-                }
-            }
-        },
-        created () {
-            eventEmitter.$on('sidebarShow', () => { // Прослушиваем событие sidebarShow
-                this.toggleSidebar()
-            })
-        }
+export default {
+  name: 'Sidebar',
+  data () {
+    return {
+      sidebarShowHold: 0,
+      sidebarShow: 0,
+      shadowShow: 0,
     }
+  },
+  computed: {
+    ...mapGetters('menu', {
+      menuList: 'items',
+    }),
+  },
+  watch: {
+    sidebarShow () {
+      if (this.sidebarShowHold) {
+        setTimeout(() => {
+          this.sidebarShowHold = !this.sidebarShowHold
+        }, 200) // время равное времени transition
+      } else {
+        this.sidebarShowHold = !this.sidebarShowHold
+      }
+    },
+  },
+  created () {
+    eventEmitter.$on('sidebarShow', () => { // Прослушиваем событие sidebarShow
+      this.toggleSidebar()
+    })
+  },
+  methods: {
+    toggleSidebar () {
+      this.sidebarShow = !this.sidebarShow
+      this.shadowShow = !this.shadowShow
+
+      if (this.sidebarShow) {
+        document.querySelector('html').setAttribute('class', 'hide-scroll')
+      } else {
+        document.querySelector('html').removeAttribute('class')
+      }
+    },
+    insertVideo () { // вставляем видео - тест
+      eventEmitter.$emit('urlUpdate') // Вызываем событие urlUpdate
+      this.toggleSidebar()
+    },
+    openError () { // открываем ошибку - тест
+      this.$store.dispatch('setError', { text: 'Пример общей ошибки', index: 'main' })
+      this.toggleSidebar()
+    },
+    removeWindowsInStorage () {
+      eventEmitter.$emit('cleanUpdate') // Вызываем событие cleanUpdate
+      this.toggleSidebar()
+    },
+  },
+}
 </script>
 
 <style lang="scss">

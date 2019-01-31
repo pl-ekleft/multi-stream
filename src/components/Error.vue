@@ -1,36 +1,43 @@
 <template>
-    <transition name="error-">
-        <div class="error-box" v-show="error.index === index" @mouseenter="closeError">
-            <div class="error-box__message" v-html="error.text"></div>
-        </div>
-    </transition>
+  <transition name="error-">
+    <div
+      v-show="error.index === index"
+      class="error-box"
+      @mouseenter="closeError"
+    >
+      <div
+        class="error-box__message"
+        v-html="error.text"
+      />
+    </div>
+  </transition>
 </template>
 
 <script>
-    export default {
-        name: "Error",
-        props: {
-            index: {
-                required: true,
-                default: ''
-            }
-        },
-        data() {
-            return {
-                result: {}
-            }
-        },
-        methods: {
-            closeError () { // удаляем данные об ошибке
-                this.$store.dispatch('clearError')
-            }
-        },
-        computed: {
-            error () { // вывод ошибки {{ error }}
-                return this.$store.getters.error
-            }
-        }
+export default {
+  name: 'Error',
+  props: {
+    index: {
+      required: true,
+      default: '',
+    },
+  },
+  data () {
+    return {
+      result: {},
     }
+  },
+  computed: {
+    error () { // вывод ошибки {{ error }}
+      return this.$store.getters.error
+    },
+  },
+  methods: {
+    closeError () { // удаляем данные об ошибке
+      this.$store.dispatch('clearError')
+    },
+  },
+}
 </script>
 
 <style lang="scss">

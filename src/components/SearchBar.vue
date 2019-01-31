@@ -1,110 +1,119 @@
 <template>
-    <div class="form-search">
-        <keep-alive>
-            <input type="search"
-                   class="form-search__input"
-                   placeholder="Введите запрос"
-                   v-model.trim.lazy="query"
-                   @click="clearSelectVideoUrl"
-                   @change="sendingRequest"
-            >
-        </keep-alive>
-        <div class="form-search__btn" @click="sendingRequest"></div>
-        <ul class="form-search-list form-search-list--scroll"
-            v-if="showResult"
-        >
-            <li class="form-search-list__item"
-                v-for="(item, key) in result.items"
-                :key="key"
-                @click="selectVideoUrl(item.id.videoId)"
-            >
-                <div class="form-search-list__thumb">
-                    <img :src="item.snippet.thumbnails.default.url" :alt="item.snippet.title"/>
-                </div>
-                <div class="form-search-list__title">
-                    {{ item.snippet.title }}
-                </div>
-                <div class="form-search-list__channel">
-                    {{ item.snippet.channelTitle }}
-                </div>
-            </li>
-        </ul>
-    </div>
+  <div class="form-search">
+    <keep-alive>
+      <input
+        v-model.trim.lazy="query"
+        type="search"
+        class="form-search__input"
+        placeholder="Введите запрос"
+        @click="clearSelectVideoUrl"
+        @change="sendingRequest"
+      >
+    </keep-alive>
+    <div
+      class="form-search__btn"
+      @click="sendingRequest"
+    />
+    <ul
+      v-if="showResult"
+      class="form-search-list form-search-list--scroll"
+    >
+      <li
+        v-for="(item, key) in result.items"
+        :key="key"
+        class="form-search-list__item"
+        @click="selectVideoUrl(item.id.videoId)"
+      >
+        <div class="form-search-list__thumb">
+          <img
+            :src="item.snippet.thumbnails.default.url"
+            :alt="item.snippet.title"
+          >
+        </div>
+        <div class="form-search-list__title">
+          {{ item.snippet.title }}
+        </div>
+        <div class="form-search-list__channel">
+          {{ item.snippet.channelTitle }}
+        </div>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <script>
-    import { eventEmitter } from '../main.js'
+import { eventEmitter } from '../main.js'
 
-    export default {
-        name: "SearchBar",
-        data() {
-            return {
-                provider: 'youtube',
-                query: '',
-                result: false,
-                showResult: false
+export default {
+  name: 'SearchBar',
+  data () {
+    return {
+      provider: 'youtube',
+      query: '',
+      result: false,
+      showResult: false,
+    }
+  },
+  computed: {
+    checkSearchResult () {
+      return this.$store.getters.getSearchShadow
+    },
+  },
+  created () {
+    eventEmitter.$on('searchHide', (payload) => { // Прослушиваем событие searchHide
+      this.toggleResult(payload)
+    })
+  },
+  methods: {
+    selectVideoUrl (videoId) {
+      if (this.provider === 'youtube' && videoId.length) {
+        // Преобразуем videoId в валидный url и диспатчим
+        this.$store.dispatch('setSelectVideoUrl', `https://www.youtube.com/embed/${videoId}`)
+        // console.log('getSelectVideoUrl result:', this.$store.getters.getSelectVideoUrl);
+      } else {
+        this.$store.dispatch('setError', { text: 'Не удалось получить videoId', index: 'main' })
+      }
+      this.toggleResult(false)
+    },
+    clearSelectVideoUrl () { // очищаем выбранный url видео
+      this.$store.dispatch('clearSelectVideoUrl')
+    },
+    sendingRequest () {
+      if (this.provider === 'youtube' && this.query.length) {
+        this.$store.dispatch('search', this.query)
+          .then(() => {
+            this.result = this.$store.getters.getSearchData
+            if (this.result.pageInfo.totalResults) {
+              this.toggleResult(true)
+            } else {
+              this.toggleResult(false)
+              this.$store.dispatch('setError', {
+                text: 'Поиск не дал результатов',
+                index: 'main',
+              })
             }
-        },
-        computed: {
-            checkSearchResult () {
-                return this.$store.getters.getSearchShadow;
-            }
-        },
-        methods: {
-            selectVideoUrl(videoId) {
-                if (this.provider === 'youtube' && videoId.length) {
-                    // Преобразуем videoId в валидный url и диспатчим
-                    this.$store.dispatch('setSelectVideoUrl', `https://www.youtube.com/embed/${videoId}`);
-                    // console.log('getSelectVideoUrl result:', this.$store.getters.getSelectVideoUrl);
-                } else {
-                    this.$store.dispatch('setError', {text: 'Не удалось получить videoId', index: 'main'})
-                }
-                this.toggleResult(false);
-            },
-            clearSelectVideoUrl() {// очищаем выбранный url видео
-                this.$store.dispatch('clearSelectVideoUrl');
-            },
-            sendingRequest() {
-                if (this.provider === 'youtube' && this.query.length) {
-                    this.$store.dispatch('search', this.query)
-                        .then(() => {
-                            this.result = this.$store.getters.getSearchData;
-                            if (this.result.pageInfo.totalResults) {
-                                this.toggleResult(true);
-                            } else {
-                                this.toggleResult(false);
-                                this.$store.dispatch('setError', {
-                                    text: 'Поиск не дал результатов',
-                                    index: 'main'
-                                })
-                            }
-                            // console.log('sendingRequest result:', this.result);
-                            /* TODO: Тестово выводим первое видео в первое окно через вызов события
+            // console.log('sendingRequest result:', this.result);
+            /* TODO: Тестово выводим первое видео в первое окно через вызов события
                             eventEmitter.$emit('urlUpdate',{
                                 url:`https://www.youtube.com/embed/${this.result.items[0].id.videoId}`,
                                 chat: {
                                     show: 0
                                 }
-                            })*/
-                        })
-                        .catch(() => {
-                        })
-                } else {
-                    this.toggleResult(false);
-                    this.$store.dispatch('setError', {text: 'Поисковый запрос пуст', index: 'main'})
-                }
-            },
-            toggleResult(status) {
-                this.showResult = status; /* TODO: На сколько сильно это необходимо? */
-                this.$store.dispatch('setShadow', status);
-            }
-        },
-        created () {
-            eventEmitter.$on('searchHide', (payload) => { // Прослушиваем событие searchHide
-                this.toggleResult(payload);
-            })
-        }
-    }
+                            }) */
+          })
+          .catch(() => {
+          })
+      } else {
+        this.toggleResult(false)
+        this.$store.dispatch('setError', { text: 'Поисковый запрос пуст', index: 'main' })
+      }
+    },
+    toggleResult (status) {
+      this.showResult = status /* TODO: На сколько сильно это необходимо? */
+      this.$store.dispatch('setShadow', status)
+    },
+  },
+}
 </script>
 
 <style lang="scss" scoped>

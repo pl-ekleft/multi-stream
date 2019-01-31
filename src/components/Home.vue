@@ -1,23 +1,23 @@
 <template>
-    <Broadcast></Broadcast>
+  <Broadcast />
 </template>
 
 <script>
-    import Broadcast from './Broadcast.vue'
+import Broadcast from './Broadcast.vue'
 
-    export default {
-        name: 'home',
-        data() {
-            return {
-            }
-        },
-        components: {
-            Broadcast
-        },
-        methods: {
-
-        }
+export default {
+  name: 'Home',
+  components: {
+    Broadcast,
+  },
+  data () {
+    return {
     }
+  },
+  methods: {
+
+  },
+}
 </script>
 
 <style lang="scss">

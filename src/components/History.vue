@@ -1,32 +1,32 @@
 <template>
-    <div class="wrapper">
-        <h1>Локальное хранилище:</h1>
-        <pre>{{ windows }}</pre>
-    </div>
+  <div class="wrapper">
+    <h1>Локальное хранилище:</h1>
+    <pre>{{ windows }}</pre>
+  </div>
 </template>
 
 <script>
-    export default {
-        name: 'history',
-        data() {
-            return {
-                windows: {}
-            }
-        },
-        components: {
+export default {
+  name: 'History',
+  components: {
 
-        },
-        methods: {
-            checkWindows() {
-                if(localStorage.windows !== null) { // проверяем наличие windows в localStorage
-                    this.windows = JSON.parse(localStorage.windows); // если найдено, то назначаем (предварительно переведя в объект)
-                }
-            }
-        },
-        created() {
-            this.checkWindows();
-        }
+  },
+  data () {
+    return {
+      windows: {},
     }
+  },
+  created () {
+    this.checkWindows()
+  },
+  methods: {
+    checkWindows () {
+      if (localStorage.windows !== null) { // проверяем наличие windows в localStorage
+        this.windows = JSON.parse(localStorage.windows) // если найдено, то назначаем (предварительно переведя в объект)
+      }
+    },
+  },
+}
 </script>
 
 <style lang="scss" scoped>

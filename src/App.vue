@@ -1,55 +1,65 @@
 <template>
   <div id="app">
     <header class="header">
-      <router-link :to="{name: 'home'}" class="logo"></router-link>
-      <search-bar></search-bar>
-      <span class="guide" @click="toggleSidebar"></span>
+      <router-link
+        :to="{name: 'home'}"
+        class="logo"
+      />
+      <search-bar />
+      <span
+        class="guide"
+        @click="toggleSidebar"
+      />
     </header>
 
     <transition name="shadow-">
-      <div class="shadow" v-show="checkSearchResult" @click="hideSearchResult(false)"></div>
+      <div
+        v-show="checkSearchResult"
+        class="shadow"
+        @click="hideSearchResult(false)"
+      />
     </transition>
 
-    <side-bar></side-bar>
+    <side-bar />
 
-    <error-box index="main"></error-box>
+    <error-box index="main" />
 
-    <router-view></router-view>
+    <router-view />
   </div>
 </template>
 
 <script>
-  import { eventEmitter } from './main.js'
-  import Sidebar from './components/Sidebar.vue'
-  import SearchBar from './components/SearchBar.vue'
-  import Error from './components/Error.vue'
+import { eventEmitter } from './main.js'
+import Sidebar from './components/Sidebar.vue'
+import SearchBar from './components/SearchBar.vue'
+import Error from './components/Error.vue'
 
-  export default {
-    name: 'app',
-    data() {
-        return {
+export default {
+  name: 'App',
+  components: {
+    errorBox: Error,
+    sideBar: Sidebar,
+    searchBar: SearchBar,
+  },
+  data () {
+    return {
 
-        }
-    },
-    components: {
-        errorBox: Error,
-        sideBar: Sidebar,
-        searchBar: SearchBar,
-    },
-    computed: {
-      checkSearchResult () {
-          return this.$store.getters.getSearchShadow;
-      }
-    },
-    methods: {
-        toggleSidebar () {
-            eventEmitter.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
-        },
-        hideSearchResult (payload) {
-            eventEmitter.$emit('searchHide', payload)
-        }
     }
-  }
+  },
+  computed: {
+    checkSearchResult () {
+      return this.$store.getters.getSearchShadow
+    },
+  },
+  methods: {
+    toggleSidebar () {
+      eventEmitter.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
+    },
+    hideSearchResult (payload) {
+      eventEmitter.$emit('searchHide', payload)
+    },
+  },
+}
 </script>
 
 <style lang="scss">
