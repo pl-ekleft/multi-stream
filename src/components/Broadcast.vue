@@ -106,13 +106,11 @@
                         url: '',
                     }
                 ],
-                localWindows: null,
                 settings: {
-                    windowsInterator: 0,
+                    windowsInterator: 0, // quantity
                     firstWindow: 1,
                     hiddenWindow: null
-                },
-                localSettings: null
+                }
             }
         },
         components: {
@@ -126,88 +124,99 @@
         },
         methods: {
             lineProcessing(key,payload=false) {
-                const url = payload.url||this.windows[key].url;
+                const thisWindow = this.windows[key];
+                const url = payload.url||thisWindow.url;
                 const match = urlParser.parse(url);
                 //console.log('lineProcessing',payload, match);
 
                 /* Проверка на наличие url */
                 if (match === undefined) {
                     this.$store.dispatch('setError', {text: 'Введенный адрес ресурса не поддерживается', index: key});
-                    this.windows[key].url = '';
-                    this.windows[key].chat.url = '';
-                    return false;
+                    thisWindow.url = '';
+                    thisWindow.chat.url = '';
                 }
 
                 /* Проверяем наличие show в payload и обновляем параметр отображение чата*/
                 if(payload.hasOwnProperty('show')) {// TODO: payload.hasOwnProperty('show') не лучшее решение
-                    this.windows[key].chat.show = payload.chat.show;
+                    thisWindow.chat.show = payload.chat.show;
                 }
 
                 /* Проверяем url и преобразуем */
                 if(match.provider === 'youtube') {
                     let params = '?autoplay=1'+(!key?'&mute=0':'&mute=1');
                     if (match.id) {
-                        /* TODO: М.б. стоит применить некий $set (для подобных целей)? */
-                        this.windows[key].url = `https://www.youtube.com/embed/${match.id}${params}`;
-                        this.windows[key].chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`;
+                        thisWindow.url = `https://www.youtube.com/embed/${match.id}${params}`;
+                        thisWindow.chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного YouTube канала', index: key});
-                        this.windows[key].url = '';
-                        this.windows[key].chat.url = '';
-                        return false;
+                        thisWindow.url = '';
+                        thisWindow.chat.url = '';
                     }
                 }
                 if(match.provider === 'twitch') {
                     let params = '&autoplay=true'+(!key?'&muted=false':'&muted=true');
                     if (match.channel && match.channel !== 'directory') {
-                        this.windows[key].url = `https://player.twitch.tv/?channel=${match.channel}${params}`;
-                        this.windows[key].chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
+                        thisWindow.url = `https://player.twitch.tv/?channel=${match.channel}${params}`;
+                        thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
                     } else if (match.id) {
-                        this.windows[key].url = `https://player.twitch.tv/?video=${match.id}${params}`;
-                        this.windows[key].chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
+                        thisWindow.url = `https://player.twitch.tv/?video=${match.id}${params}`;
+                        thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`;
                     } else {
                         this.$store.dispatch('setError', {text: 'Проверьте URL введенного Twitch канала', index: key});
-                        this.windows[key].url = '';
-                        this.windows[key].chat.url = '';
-                        return false;
+                        thisWindow.url = '';
+                        thisWindow.chat.url = '';
                     }
                 }
-                this.updateLocalStorage('windows'); /* TODO: Сомнительное решение, нет полной реактивности windows */
+
+                this.$set(this.windows, key, thisWindow); // применяем изменения к основному объекту
             },
-            addBroadcast() { // quantity
-                let obj = this.windows[this.settings.windowsInterator];
+            addBroadcast() {
+                const thisSettings = this.settings;
+                let obj = this.windows[thisSettings.windowsInterator];
                     obj.disabled = 0; // снимаем блокировку с последнего окна
 
-                this.settings.windowsInterator++;
-                this.$set(this.windows, this.settings.windowsInterator, {chat: {url: '', show: 0}, disabled: 1, index: obj.index+1, url: ''}); // к массиву windows вставляем поле/ключ windowsInterator с объектом по умолчанию
-                // $set(объект, в который будет добавляться новое свойство / имя нового свойства / значение нового свойства)
-                this.updateLocalStorage('settings');
+                thisSettings.windowsInterator++;
+
+                this.$set(this.windows, thisSettings.windowsInterator, {chat: {url: '', show: 0}, disabled: 1, index: obj.index+1, url: ''}); // добавляем дефолтный объект (окно)
+
+                //this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
             },
             deleteBroadcast(key,index) {
                 this.$delete(this.windows, key);
-                this.settings.windowsInterator--;
-                if(this.settings.firstWindow === index) { // контроль первого окна (при удалении первого)
+
+                let thisSettings = this.settings;
+                    thisSettings.windowsInterator--;
+
+                if(thisSettings.firstWindow === index) { // контроль первого окна (при удалении первого)
                     this.mainWindow(this.windows[0].index);
                 }
-                this.settings.hiddenWindow = (this.settings.windowsInterator?this.settings.hiddenWindow:null); // контроль скрытого окна (при удалении)
-                this.updateLocalStorage('settings');
+                if(!thisSettings.windowsInterator) {
+                    thisSettings.hiddenWindow = null; // контроль скрытого окна (при удалении)
+                }
+
+                //this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
             },
             mainWindow(index) {
-                this.settings.firstWindow = index;
-                this.updateLocalStorage('settings');
+                const thisSettings = this.settings;
+                      thisSettings.firstWindow = index;
+
+                //this.$set(this.settings, 'firstWindow', thisSettings.firstWindow);
             },
             toggleWindows(index) {
-                if(this.settings.hiddenWindow === null) {
-                    this.settings.hiddenWindow = index;
+                const thisSettings = this.settings;
+                if(thisSettings.hiddenWindow === null) {
+                    thisSettings.hiddenWindow = index;
                 } else {
-                    this.settings.hiddenWindow = null;
+                    thisSettings.hiddenWindow = null;
                 }
-                this.updateLocalStorage('settings');
+                //this.$set(this.settings, 'hiddenWindow', thisSettings.hiddenWindow);
             },
             toggleChat(key) {
-                let chat = this.windows[key].chat;
+                const thisWindow = this.windows[key];
+                let chat = thisWindow.chat;
                     chat.show = !chat.show;
-                this.updateLocalStorage('windows');
+
+                this.$set(this.windows, key, thisWindow);
             },
             selectWindow(key,url) {// выбор окна для вставки url из поисковой выдачи
                 if(url) {
@@ -217,21 +226,27 @@
             },
             removeLocalStorage () { // переназначаем windows в state на значениея по умолчанию
                 /* TODO: Плохое решение по сбросу данных до дефолтных */
+                //this.$set(this, 'windows', [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}]);
+                //this.$set(this, 'settings', {windowsInterator: 0, firstWindow: 1, hiddenWindow: null});
                 this.windows = [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}];
                 this.settings = {windowsInterator: 0, firstWindow: 1, hiddenWindow: null};
                 this.addBroadcast();
-            },
-            updateLocalStorage (name) { // перезаписываем windows (предварительно переведя в строку)
-                /* TODO: Приходится постоянно вызывать this.updateLocalStorage('settings') - это не круто */
-                localStorage.setItem(name, JSON.stringify(this[name]));
             }
         },
         watch: {
             windows(localWindows) { // следим за windows и обновляем значение в localStorage (предварительно переведя в строку)
                 localStorage.windows = JSON.stringify(localWindows);
             },
-            settings(localSettings) {
+            /*settings(localSettings) {
+                // TODO: Понять причину отказа работы this.$set(this.settings, 'name', thisSettings.name);
                 localStorage.settings = JSON.stringify(localSettings);
+            },*/
+            settings: {
+                // TODO: Пришлось запустить глубокое слежение из-за каприза this.$set
+                handler(localSettings){ // глубокое слежение
+                    localStorage.settings = JSON.stringify(localSettings);
+                },
+                deep: true
             }
         },
         mounted () {
@@ -244,6 +259,7 @@
             }
         },
         created () {
+            console.log(this);
             if(!localStorage.windows) {// если windows не найден в localStorage
                 this.addBroadcast(); // вставляем окно добавления (по умолчанию оно блокируется)
             }
