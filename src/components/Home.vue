@@ -1,5 +1,5 @@
 <template>
-  <Broadcast />
+  <broadcast />
 </template>
 
 <script>
@@ -8,7 +8,7 @@ import Broadcast from './Broadcast.vue'
 export default {
   name: 'Home',
   components: {
-    Broadcast,
+    broadcast: Broadcast,
   },
   data () {
     return {

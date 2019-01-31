@@ -50,10 +50,9 @@
           @click="deleteBroadcast(key,win.index)"
         />
       </div>
-      <div
-        class="broadcast__number"
-        v-html="win.index"
-      />
+      <div class="broadcast__number">
+        {{ win.index }}
+      </div>
       <div class="broadcast__video">
         <iframe
           width="560"

@@ -7,8 +7,9 @@
     >
       <div
         class="error-box__message"
-        v-html="error.text"
-      />
+      >
+        {{ error.text }}
+      </div>
     </div>
   </transition>
 </template>
@@ -18,8 +19,9 @@ export default {
   name: 'Error',
   props: {
     index: {
+      type: Number,
       required: true,
-      default: '',
+      default: null,
     },
   },
   data () {
