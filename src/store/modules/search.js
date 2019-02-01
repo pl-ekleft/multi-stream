@@ -35,9 +35,9 @@ export default {
       commit('clearError')
       try {
         /**
-                 * TODO: Ключ (YouTube Data API v3) будет работать только на http://localhost:8080/
-                 * Для получения своего ключа используйте: https://console.developers.google.com/apis/dashboard
-                 **/
+         * TODO: Ключ (YouTube Data API v3) будет работать только на http://localhost:8080/
+         * Для получения своего ключа используйте: https://console.developers.google.com/apis/dashboard
+         **/
         const data = await searchYoutube('AIzaSyAOmRCB6nA7SR2_XnPR9XaGWpSyB-f7mrs', { q: payload, part: 'snippet', type: 'video', maxResults: 35 })
         commit('setSearchData', data)
         commit('setLoading', false)

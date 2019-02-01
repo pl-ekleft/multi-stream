@@ -30,12 +30,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-    pre {
-        font-size: 1.5em;
-    }
-    .wrapper {
-        display: block;
-        padding: 10px;
-        box-sizing: border-box;
-    }
+  pre {
+    font-size: 1.5em;
+  }
+  .wrapper {
+    display: block;
+    padding: 10px;
+    box-sizing: border-box;
+  }
 </style>

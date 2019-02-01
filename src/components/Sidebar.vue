@@ -150,155 +150,154 @@ export default {
 </script>
 
 <style lang="scss">
-    .hide-scroll {
-        overflow: hidden;
-    }
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
+  .hide-scroll {
+    overflow: hidden;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    z-index: 2022;
+    &-group {
+      padding: 8px 0;
+      border-bottom: 1px solid $rgba-255-8;
+      &__title {
         display: block;
-        width: 100%;
-        height: 100%;
-        z-index: 2022;
-        &-group {
-            padding: 8px 0;
-            border-bottom: 1px solid $rgba-255-8;
-            &__title {
-                display: block;
-                padding: 8px 24px;
-                color: $rgba-255-60;
-                font-size: 1.4rem;
-                font-weight: 500;
-                letter-spacing: .007px;
-                text-transform: uppercase;
-                a {
-                    color: inherit;
-                    text-decoration: none;
-                    &:hover {
-                        color: $rgba-255;
-                    }
-                }
-            }
-            &__item {
-                min-height: 40px;
-                flex: 1;
-                flex-direction: row;
-                align-items: center;
-                box-sizing: border-box;
-                color: $rgba-255-94;
-                font-size: 1.5rem;
-                line-height: 3rem;
-                > a, > span {
-                    padding: 0 24px;
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    min-height: 40px;
+        padding: 8px 24px;
+        color: $rgba-255-60;
+        font-size: 1.4rem;
+        font-weight: 500;
+        letter-spacing: .007px;
+        text-transform: uppercase;
+        a {
+          color: inherit;
+          text-decoration: none;
+          &:hover {
+            color: $rgba-255;
+          }
+        }
+      }
+      &__item {
+        min-height: 40px;
+        flex: 1;
+        flex-direction: row;
+        align-items: center;
+        box-sizing: border-box;
+        color: $rgba-255-94;
+        font-size: 1.5rem;
+        line-height: 3rem;
+        > a, > span {
+          padding: 0 24px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          min-height: 40px;
 
-                    cursor: pointer;
-                    box-sizing: border-box;
-                    outline: 0;
-                    color: inherit;
-                    text-decoration: none;
+          cursor: pointer;
+          box-sizing: border-box;
+          outline: 0;
+          color: inherit;
+          text-decoration: none;
 
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                    font-size: 1.4rem;
-                    font-weight: 400;
-                    line-height: 2.1rem;
-                }
-                &:hover {
-                    background-color: $rgba-255-19;
-                    cursor: pointer;
-                }
-            }
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          font-size: 1.4rem;
+          font-weight: 400;
+          line-height: 2.1rem;
         }
-        &__header {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 10px 20px;
-            width: 100%;
-            height: 57px;
-            border-bottom: 1px solid $rgba-255-8;
-            box-sizing: border-box;
+        &:hover {
+          background-color: $rgba-255-19;
+          cursor: pointer;
         }
-        &__footer {
-            padding: 24px 24px 0;
-            color: hsl(0, 0%, 53.3%);
-            font-size: 1.3rem;
-            font-weight: 500;
-            line-height: 2.1rem;
-            a {
-                display: inline-block;
-                text-decoration: none;
-                color: inherit;
-                font-size: inherit;
-                font-weight: inherit;
-                line-height: inherit;
-                white-space: nowrap;
-                &:not(:last-child) {
-                    margin-right: 8px;
-                }
-            }
-        }
-        &__copyright {
-            padding: 24px;
-            color: hsl(0, 0%, 53.3%);
-            font-size: 1.3rem;
-            font-weight: 500;
-            line-height: 2.1rem;
-        }
-        &__wrapper {
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: block;
-            width: 90%;
-            max-width: 256px;
-            height: 100%;
-            font-size: 1.5rem;
-            line-height: 1.5rem;
-            transition: transform 0.2s ease;
-            transform: translate3d(0, 0, 0);
-            /*transition: all 0.3s cubic-bezier(.65, .05, .36, 1);*/
-            background-color: rgb(29, 29, 29);
-            z-index: 2023;
-            &--enter,
-            &--leave-to {
-                transition: transform 0.2s ease;
-                transform: translate3d(100%, 0, 0);
-                /*right: -100%;*/
-                /*transition: all 0.3s cubic-bezier(.65, .05, .36, 1);*/
-
-            }
-        }
-        &__content {
-            max-height: calc(100% - 56px);
-            &--scroll {
-                overflow-y: auto;
-                overflow-x: hidden;
-                @include scroll();
-            }
-        }
-        &__shadow {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.2s ease;
-            opacity: 1;
-            background: $rgba-50;
-            z-index: inherit;
-            &--enter,
-            &--leave-to {
-                opacity: 0;
-            }
-        }
+      }
     }
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 20px;
+      width: 100%;
+      height: 57px;
+      border-bottom: 1px solid $rgba-255-8;
+      box-sizing: border-box;
+    }
+    &__footer {
+      padding: 24px 24px 0;
+      color: hsl(0, 0%, 53.3%);
+      font-size: 1.3rem;
+      font-weight: 500;
+      line-height: 2.1rem;
+      a {
+        display: inline-block;
+        text-decoration: none;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        white-space: nowrap;
+        &:not(:last-child) {
+          margin-right: 8px;
+        }
+      }
+    }
+    &__copyright {
+      padding: 24px;
+      color: hsl(0, 0%, 53.3%);
+      font-size: 1.3rem;
+      font-weight: 500;
+      line-height: 2.1rem;
+    }
+    &__wrapper {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: block;
+      width: 90%;
+      max-width: 256px;
+      height: 100%;
+      font-size: 1.5rem;
+      line-height: 1.5rem;
+      transition: transform 0.2s ease;
+      transform: translate3d(0, 0, 0);
+      /*transition: all 0.3s cubic-bezier(.65, .05, .36, 1);*/
+      background-color: rgb(29, 29, 29);
+      z-index: 2023;
+      &--enter,
+      &--leave-to {
+        transition: transform 0.2s ease;
+        transform: translate3d(100%, 0, 0);
+        /*right: -100%;*/
+        /*transition: all 0.3s cubic-bezier(.65, .05, .36, 1);*/
+      }
+    }
+    &__content {
+      max-height: calc(100% - 56px);
+      &--scroll {
+        overflow-y: auto;
+        overflow-x: hidden;
+        @include scroll();
+      }
+    }
+    &__shadow {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.2s ease;
+      opacity: 1;
+      background: $rgba-50;
+      z-index: inherit;
+      &--enter,
+      &--leave-to {
+        opacity: 0;
+      }
+    }
+  }
 </style>

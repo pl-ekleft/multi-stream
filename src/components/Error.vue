@@ -19,9 +19,9 @@ export default {
   name: 'Error',
   props: {
     index: {
-      type: Number,
+      type: [String, Number],
       required: true,
-      default: null,
+      default: '',
     },
   },
   data () {
@@ -43,29 +43,29 @@ export default {
 </script>
 
 <style lang="scss">
-.error {
+  .error {
     &-box {
-        position: fixed;
-        top: 56px;
-        left: 0;
-        padding: 5px 15px;
-        width: 100%;
-        height: 30px;
-        text-align: center;
-        background: $red;
-        box-sizing: border-box;
-        transition: all .3s ease-in-out;
-        z-index: 2000;
-        &__message {
-            padding-right: 40px;
-            color: $rgba-255;
-            font-size: 14px;
-            line-height: 20px;
-        }
+      position: fixed;
+      top: 56px;
+      left: 0;
+      padding: 5px 15px;
+      width: 100%;
+      height: 30px;
+      text-align: center;
+      background: $red;
+      box-sizing: border-box;
+      transition: all .3s ease-in-out;
+      z-index: 2000;
+      &__message {
+        padding-right: 40px;
+        color: $rgba-255;
+        font-size: 14px;
+        line-height: 20px;
+      }
     }
     &--enter,
     &--leave-to {
         top: -56px;
     }
-}
+  }
 </style>
