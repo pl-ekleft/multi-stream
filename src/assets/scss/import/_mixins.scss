@@ -2,43 +2,38 @@
     -webkit-overflow-scrolling: touch;
     @include no-touch-scroll();
 }
-
+/* Help: https://css-tricks.com/custom-scrollbars-in-webkit/ */
 @mixin no-touch-scroll($color: transparent, $bg: hsla(0, 0%, 53.3%, .4), $bg-hover: hsla(0, 0%, 53.3%, .5)) {
-    &::-webkit-scrollbar-thumb:hover {
-        background-color: $bg-hover;
-        cursor: -moz-grab;
-        cursor: -webkit-grab;
-        cursor: grab;
-    }
-    &::-webkit-scrollbar-thumb:active {
-        cursor: -moz-grabbing;
-        cursor: -webkit-grabbing;
-        cursor: grabbing;
-    }
     &::-webkit-scrollbar {
         margin: 0 20px;
         width: 8px;
         height: 8px;
         background-color: $color;
-    }
-    &::-webkit-scrollbar-corner {
-        background-color: $color;
-    }
-    &::-webkit-scrollbar-track {
-        border: 0 solid $color;
-    }
-    &::-webkit-scrollbar-thumb {
-        background-color: $bg;
-        &:hover {
-            background-color: $bg-hover;
-            cursor: -moz-grab;
-            cursor: -webkit-grab;
-            cursor: grab;
+        &-button {
+
         }
-        &:active {
-            cursor: -moz-grabbing;
-            cursor: -webkit-grabbing;
-            cursor: grabbing;
+        &-track {
+            border: 0 solid $color;
+            &-piece {
+
+            }
+        }
+        &-thumb {
+            background-color: $bg;
+            &:hover {
+                background-color: $bg-hover;
+                cursor: -moz-grab;
+                cursor: -webkit-grab;
+                cursor: grab;
+            }
+            &:active {
+                cursor: -moz-grabbing;
+                cursor: -webkit-grabbing;
+                cursor: grabbing;
+            }
+        }
+        &-corner {
+            background-color: $color;
         }
     }
     &::-webkit-resizer {

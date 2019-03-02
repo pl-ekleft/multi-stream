@@ -52,6 +52,7 @@ export default {
       query: '',
       result: false,
       showResult: false,
+      pageNumber: 0,
     }
   },
   computed: {
@@ -80,7 +81,7 @@ export default {
     },
     sendingRequest () {
       if (this.provider === 'youtube' && this.query.length) {
-        this.$store.dispatch('search', this.query)
+        this.$store.dispatch('search', this.query) // отправляем поисковый запрос
           .then(() => {
             this.result = this.$store.getters.getSearchData
             if (this.result.pageInfo.totalResults) {

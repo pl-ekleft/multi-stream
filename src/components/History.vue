@@ -1,8 +1,8 @@
 <template>
-  <div class="wrapper">
+  <main class="wrapper">
     <h1>Локальное хранилище:</h1>
     <pre>{{ windows }}</pre>
-  </div>
+  </main>
 </template>
 
 <script>

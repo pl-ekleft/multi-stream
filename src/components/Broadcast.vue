@@ -1,6 +1,6 @@
 <template>
-  <div class="wrapper">
-    <div
+  <main class="wrapper">
+    <section
       v-for="(win, key) in windows"
       :key="key"
       class="broadcast"
@@ -94,8 +94,8 @@
         />
       </div>
       <error-box :index="key" />
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
 
 <script>
@@ -297,7 +297,8 @@ export default {
   .wrapper {
     display: flex;
     flex-wrap: wrap;
-    justify-content: start;
+    align-items: flex-start;
+    justify-content: flex-start;
     padding: 10px;
     font-size: 0;
     box-sizing: border-box;

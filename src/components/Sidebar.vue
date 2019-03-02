@@ -4,7 +4,7 @@
     class="sidebar"
   >
     <transition name="sidebar__wrapper-">
-      <div
+      <aside
         v-show="sidebarShow"
         class="sidebar__wrapper"
       >
@@ -14,7 +14,7 @@
             @click="toggleSidebar"
           />
         </div>
-        <div class="sidebar__content sidebar__content--scroll">
+        <nav class="sidebar__content sidebar__content--scroll">
           <div class="sidebar-group">
             <div class="sidebar-group__title">
               Тестовый функционал
@@ -32,8 +32,8 @@
               <span>Показать ошибку</span>
             </div>
           </div>
-        </div>
-        <div class="sidebar__content sidebar__content--scroll">
+        </nav>
+        <nav class="sidebar__content sidebar__content--scroll">
           <div class="sidebar-group">
             <div class="sidebar-group__title">
               Управление хранилищем
@@ -45,8 +45,8 @@
               <span>Удалить сохранённые данные</span>
             </div>
           </div>
-        </div>
-        <div
+        </nav>
+        <nav
           v-if="false"
           class="sidebar__content sidebar__content--scroll"
         >
@@ -69,14 +69,14 @@
               <a>{{ item.text }}</a>
             </router-link>
           </div>
-        </div>
-        <div class="sidebar__footer">
+        </nav>
+        <footer class="sidebar__footer">
           Ресурс позволяет пользователю одновременно просматривать несколько стримов или видео с YouTube и Twitch.
-        </div>
-        <div class="sidebar__copyright">
-          © 2018 Levin Pavel, MIT
-        </div>
-      </div>
+        </footer>
+        <address class="sidebar__copyright">
+          © 2019 Levin Pavel, MIT
+        </address>
+      </aside>
     </transition>
     <transition name="sidebar__shadow-">
       <div
