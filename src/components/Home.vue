@@ -8,15 +8,15 @@ import Broadcast from './Broadcast.vue'
 export default {
   name: 'Home',
   components: {
-    broadcast: Broadcast,
+    broadcast: Broadcast
   },
-  data () {
+  data() {
     return {
     }
   },
   methods: {
 
-  },
+  }
 }
 </script>
 

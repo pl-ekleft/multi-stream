@@ -9,8 +9,8 @@ module.exports = {
           @import "@/assets/scss/import/_variables.scss";
           @import "@/assets/scss/import/_mixins.scss";
           @import "@/assets/scss/import/_images.scss";
-        `,
-      },
-    },
-  },
+        `
+      }
+    }
+  }
 }

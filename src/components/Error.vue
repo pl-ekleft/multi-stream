@@ -21,24 +21,24 @@ export default {
     index: {
       type: [String, Number],
       required: true,
-      default: '',
-    },
+      default: ''
+    }
   },
-  data () {
+  data() {
     return {
-      result: {},
+      result: {}
     }
   },
   computed: {
-    error () { // вывод ошибки {{ error }}
+    error() { // вывод ошибки {{ error }}
       return this.$store.getters.error
-    },
+    }
   },
   methods: {
-    closeError () { // удаляем данные об ошибке
+    closeError() { // удаляем данные об ошибке
       this.$store.dispatch('clearError')
-    },
-  },
+    }
+  }
 }
 </script>
 

@@ -85,9 +85,9 @@
             type="text"
             placeholder="Вставьте URL"
             @change="lineProcessing(key)"
-          >
+          />
         </keep-alive>
-        <div
+        <button
           class="broadcast__panel-enter"
           title="Ввод"
           @click="lineProcessing(key)"
@@ -106,36 +106,36 @@ import Error from './Error.vue'
 export default {
   name: 'Broadcast',
   components: {
-    errorBox: Error,
+    errorBox: Error
   },
-  data () {
+  data() {
     return {
       windows: [
         {
           chat: {
             url: '',
-            show: 1,
+            show: 1
           },
           disabled: 1,
           index: 1,
-          url: '',
-        },
+          url: ''
+        }
       ],
       settings: {
         windowsInterator: 0, // quantity
         firstWindow: 1,
-        hiddenWindow: null,
-      },
+        hiddenWindow: null
+      }
     }
   },
   computed: {
-    checkSelectVideoUrl () {
+    checkSelectVideoUrl() {
       // console.log('checkSelectVideoUrl', this.$store.getters.getSelectVideoUrl);
       return this.$store.getters.getSelectVideoUrl
-    },
+    }
   },
   watch: {
-    windows (localWindows) { // следим за windows и обновляем значение в localStorage (предварительно переведя в строку)
+    windows(localWindows) { // следим за windows и обновляем значение в localStorage (предварительно переведя в строку)
       localStorage.windows = JSON.stringify(localWindows)
     },
     /* settings(localSettings) {
@@ -144,13 +144,13 @@ export default {
     }, */
     settings: {
       // TODO: Пришлось запустить глубокое слежение из-за каприза this.$set
-      handler (localSettings) { // глубокое слежение
+      handler(localSettings) { // глубокое слежение
         localStorage.settings = JSON.stringify(localSettings)
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
-  mounted () {
+  mounted() {
     if (localStorage.windows) { // перезаписываем windows значением из localStorage (предварительно переведя в объект)
       /* TODO: Рецепт https://ru.vuejs.org/v2/cookbook/client-side-storage.html */
       this.windows = JSON.parse(localStorage.windows)
@@ -159,16 +159,18 @@ export default {
       this.settings = JSON.parse(localStorage.settings)
     }
   },
-  created () {
+  created() {
     if (!localStorage.windows) { // если windows не найден в localStorage
       this.addBroadcast() // вставляем окно добавления (по умолчанию оно блокируется)
     }
 
-    eventEmitter.$on('urlUpdate', (payload) => { // Прослушиваем событие urlUpdate
+    eventEmitter.$on('urlUpdate', (payload, key = 0) => { // Прослушиваем событие urlUpdate
       /* TODO: Подумать, для каких целей нужно данное событие */
-      const key = 0 // ключ окна для вставки адреса
-      payload = payload || { url: 'https://www.youtube.com/embed/oI3GdbsbDxk', chat: { show: 1 } }
-      this.lineProcessing(key, payload)
+      payload = payload || { url: 'https://www.youtube.com/watch?v=EFIotmFi5Sk', chat: { show: 1 }}
+      if (this.settings.windowsInterator <= key) { // проверяем, существует ли окно
+        this.addBroadcast()
+      }
+      this.lineProcessing(key, payload) // присваиваем данные для выбранного окна
     })
 
     eventEmitter.$on('cleanUpdate', () => { // Событие для сброса windows в state
@@ -176,7 +178,7 @@ export default {
     })
   },
   methods: {
-    lineProcessing (key, payload = false) {
+    lineProcessing(key, payload = false) {
       const thisWindow = this.windows[key]
       const url = payload.url || thisWindow.url
       const match = urlParser.parse(url)
@@ -196,7 +198,7 @@ export default {
 
       /* Проверяем url и преобразуем */
       if (match.provider === 'youtube') {
-        let params = '?autoplay=1' + (!key ? '&mute=0' : '&mute=1')
+        const params = '?autoplay=1' + (!key ? '&mute=0' : '&mute=1')
         if (match.id) {
           thisWindow.url = `https://www.youtube.com/embed/${match.id}${params}`
           thisWindow.chat.url = `https://www.youtube.com/live_chat?v=${match.id}&embed_domain=${document.domain}`
@@ -207,7 +209,7 @@ export default {
         }
       }
       if (match.provider === 'twitch') {
-        let params = '&autoplay=true' + (!key ? '&muted=false' : '&muted=true')
+        const params = '&autoplay=true' + (!key ? '&muted=false' : '&muted=true')
         if (match.channel && match.channel !== 'directory') {
           thisWindow.url = `https://player.twitch.tv/?channel=${match.channel}${params}`
           thisWindow.chat.url = `https://www.twitch.tv/embed/${match.channel}/chat?darkpopout`
@@ -223,9 +225,9 @@ export default {
 
       this.$set(this.windows, key, thisWindow) // применяем изменения к основному объекту
     },
-    addBroadcast () {
+    addBroadcast() {
       const thisSettings = this.settings
-      let obj = this.windows[thisSettings.windowsInterator]
+      const obj = this.windows[thisSettings.windowsInterator]
       obj.disabled = 0 // снимаем блокировку с последнего окна
 
       thisSettings.windowsInterator++
@@ -234,10 +236,10 @@ export default {
 
       // this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
     },
-    deleteBroadcast (key, index) {
+    deleteBroadcast(key, index) {
       this.$delete(this.windows, key)
 
-      let thisSettings = this.settings
+      const thisSettings = this.settings
       thisSettings.windowsInterator--
 
       if (thisSettings.firstWindow === index) { // контроль первого окна (при удалении первого)
@@ -249,13 +251,13 @@ export default {
 
       // this.$set(this.settings, 'windowsInterator', thisSettings.windowsInterator);
     },
-    mainWindow (index) {
+    mainWindow(index) {
       const thisSettings = this.settings
       thisSettings.firstWindow = index
 
       // this.$set(this.settings, 'firstWindow', thisSettings.firstWindow);
     },
-    toggleWindows (index) {
+    toggleWindows(index) {
       const thisSettings = this.settings
       if (thisSettings.hiddenWindow === null) {
         thisSettings.hiddenWindow = index
@@ -264,28 +266,28 @@ export default {
       }
       // this.$set(this.settings, 'hiddenWindow', thisSettings.hiddenWindow);
     },
-    toggleChat (key) {
+    toggleChat(key) {
       const thisWindow = this.windows[key]
-      let chat = thisWindow.chat
+      const chat = thisWindow.chat
       chat.show = !chat.show
 
       this.$set(this.windows, key, thisWindow)
     },
-    selectWindow (key, url) { // выбор окна для вставки url из поисковой выдачи
+    selectWindow(key, url) { // выбор окна для вставки url из поисковой выдачи
       if (url) {
         this.lineProcessing(key, { url: url })
         this.$store.dispatch('clearSelectVideoUrl')
       }
     },
-    removeLocalStorage () { // переназначаем windows в state на значениея по умолчанию
+    removeLocalStorage() { // переназначаем windows в state на значения по умолчанию
       /* TODO: Плохое решение по сбросу данных до дефолтных */
       // this.$set(this, 'windows', [{chat: {url: '', show: 1}, disabled: 0, index: 1, url: ''}]);
       // this.$set(this, 'settings', {windowsInterator: 0, firstWindow: 1, hiddenWindow: null});
       this.windows = [{ chat: { url: '', show: 1 }, disabled: 0, index: 1, url: '' }]
       this.settings = { windowsInterator: 0, firstWindow: 1, hiddenWindow: null }
       this.addBroadcast()
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -372,229 +374,239 @@ export default {
       }
       &--expand {
         &:before {
-            mask: url($icon-expand) 50% 50% / 24px no-repeat;
+          mask: url($icon-expand) 50% 50% / 24px no-repeat;
         }
       }
       &--minimize {
         border-radius: 0 0 0 4px;
         &:before {
-            mask: url($icon-minimize) 50% 50% / 24px no-repeat;
+          mask: url($icon-minimize) 50% 50% / 24px no-repeat;
         }
       }
       &--maximize {
         &:before {
-            mask: url($icon-maximize) 50% 50% / 24px no-repeat;
+          mask: url($icon-maximize) 50% 50% / 24px no-repeat;
         }
       }
       &--chat {
         &:before {
-            mask: url($icon-chat) 50% 50% / 24px no-repeat;
+          mask: url($icon-chat) 50% 50% / 24px no-repeat;
         }
       }
     }
     &__number {
-        position: absolute;
-        top: 11px;
-        left: 11px;
-        width: 42px;
-        height: 42px;
-        color: $rgba-255;
-        font-size: 25px;
-        line-height: 42px;
-        text-align: center;
-        border-radius: 50%;
-        text-shadow: 0 0 5px rgba(23,23,23,0.9);
-        background-color: $rgba-26-19;
-        transition: opacity 0.2s ease-in-out;
-        opacity: 0;
-        z-index: 2;
+      position: absolute;
+      top: 11px;
+      left: 11px;
+      width: 42px;
+      height: 42px;
+      color: $rgba-255;
+      font-size: 25px;
+      line-height: 42px;
+      text-align: center;
+      border-radius: 50%;
+      text-shadow: 0 0 5px rgba(23,23,23,0.9);
+      background-color: $rgba-26-19;
+      transition: opacity 0.2s ease-in-out;
+      opacity: 0;
+      z-index: 2;
     }
     &:hover:not(&--flicker) & {
-        &__number,
-        &__btn {
-            opacity: 1;
-        }
+      &__number,
+      &__btn {
+        opacity: 1;
+      }
     }
     &__video {
-        position: relative;
-        display: flex;
+      position: relative;
+      display: flex;
+      width: 100%;
+      height: calc(100% - 30px);
+      background-color: rgba(225, 225, 225, .037);
+      iframe {
         width: 100%;
-        height: calc(100% - 30px);
-        background-color: rgba(225, 225, 225, .037);
-        iframe {
-            width: 100%;
-            height: 100%;
-        }
+        height: 100%;
+      }
     }
     &__chat {
-        position: absolute;
-        top: 0;
-        right: 0;
-        display: block;
-        width: 30%;
-        min-width: 240px;
-        max-width: 340px;
-        height: 100%;
-        &--enter,
-        &--leave,
-        &--leave-to {
-            right: -100%;
-            width: 0;
-            &-active {
-                transition: all 0.3s cubic-bezier(.65, .05, .36, 1);
-            }
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: block;
+      width: 30%;
+      min-width: 240px;
+      max-width: 340px;
+      height: 100%;
+      &--enter,
+      &--leave,
+      &--leave-to {
+        right: -100%;
+        width: 0;
+        &-active {
+          transition: all 0.3s cubic-bezier(.65, .05, .36, 1);
         }
+      }
     }
     &__panel {
-        position: relative;
-        color: $rgba-255-70;
+      position: relative;
+      color: $rgba-255-70;
+      border-radius: 0 0 4px 4px;
+      background: rgb(40, 40, 40);
+      z-index: 2;
+      input {
+        display: block;
+        padding: 5px 30px 5px 15px;
+        width: 100%;
+        border: 1px solid rgb(40, 40, 40);
+        box-sizing: border-box;
+        color: inherit;
+        font-size: 14px;
+        line-height: 18px;
+        background: none;
         border-radius: 0 0 4px 4px;
-        background: rgb(40, 40, 40);
-        z-index: 2;
-        input {
-            display: block;
-            padding: 5px 30px 5px 15px;
-            width: 100%;
-            border: 0;
-            box-sizing: border-box;
-            color: inherit;
-            font-size: 14px;
-            line-height: 20px;
-            background: none;
+        box-sizing: border-box;
+        &:focus {
+          border-color: $blue;
+          outline: none;
         }
-        &-enter {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 20px;
-            height: 20px;
-            background: url($icon-enter) 50% 50% / cover no-repeat;
-            transition: opacity 0.2s ease-in-out;
-            opacity: .2;
-            cursor: pointer;
-            &:hover {
-                opacity: .7;
-            }
+      }
+      &-enter {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 20px;
+        height: 20px;
+        background: url($icon-enter) 50% 50% / cover no-repeat;
+        transition: opacity 0.2s ease-in-out;
+        opacity: .2;
+        cursor: pointer;
+        border: none;
+        &:hover {
+          opacity: .7;
         }
+        &:focus {
+          outline: 1px solid $blue;
+        }
+      }
     }
     &__append {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background:  url($icon-plus) 50% 50% / 110px no-repeat;
+      transition: opacity .3s ease;
+      opacity: .06;
+      cursor: cell;
+      z-index: 3;
+    }
+    &--first {
+      display: block;
+      order: -1;
+      width: 100%;
+      height: calc(60vh - 86px);
+    }
+    &--first & {
+      &__chat {
+        position: relative;
+      }
+    }
+    &--scale {
+      height: calc(100vh - 96px);
+    }
+    &--hidden {
+      position: fixed;
+      top: -100%;
+      left: -100%;
+      width: 0;
+      height: 0;
+    }
+    &--disabled {
+      &:before {
+        content: '';
         position: absolute;
         top: 0;
         left: 0;
-        display: block;
         width: 100%;
         height: 100%;
-        background:  url($icon-plus) 50% 50% / 110px no-repeat;
-        transition: opacity .3s ease;
-        opacity: .06;
-        cursor: cell;
+        background-color: rgba(19, 19, 19, 0.5);
         z-index: 3;
-    }
-    &--first {
-        display: block;
-        order: -1;
-        width: 100%;
-        height: calc(60vh - 86px);
-    }
-    &--first & {
-        &__chat {
-            position: relative;
-        }
-    }
-    &--scale {
-        height: calc(100vh - 96px);
-    }
-    &--hidden {
-        position: fixed;
-        top: -100%;
-        left: -100%;
-        width: 0;
-        height: 0;
-    }
-    &--disabled {
-        &:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(19, 19, 19, 0.5);
-            z-index: 3;
-        }
+      }
     }
     &--disabled & {
-        &__bar {
-            z-index: 4;
+      &__bar {
+        z-index: 4;
+      }
+      &__btn {
+        display: none;
+        &--minimize,
+        &--maximize {
+          display: block;
         }
-        &__btn {
-            display: none;
-            &--minimize,
-            &--maximize {
-                display: block;
-            }
-        }
+      }
     }
     &--loading {
-        &:before {
-            content: 'Загрузка . . .';
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 30px;
-            width: 100%;
-            height: 100%;
-            color: $rgba-255-50;
-            font-size: 1.5rem;
-            line-height: 1.5rem;
-            box-sizing: border-box;
-        }
+      &:before {
+        content: 'Загрузка . . .';
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 30px;
+        width: 100%;
+        height: 100%;
+        color: $rgba-255-50;
+        font-size: 1.5rem;
+        line-height: 1.5rem;
+        box-sizing: border-box;
+      }
     }
     &--disabled:first-child,
     &:first-child + &--disabled {
-        flex-grow: 0;
-        width: calc(50% - 20px);
+      flex-grow: 0;
+      width: calc(50% - 20px);
     }
     &--flicker {
-        animation: flicker 1s infinite ease-in-out alternate;
-        cursor: pointer;
+      animation: flicker 1s infinite ease-in-out alternate;
+      cursor: pointer;
+      &:before {
+        content: 'Выберите окно';
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 30px;
+        width: 100%;
+        height: 100%;
+        color: $blue;
+        background-color: $rgba-50;
+        font-size: 2.5rem;
+        line-height: 2.5rem;
+        box-sizing: border-box;
+        transition: all .15s ease;
+        z-index: 5;
+      }
+      &:hover {
+        /*animation-play-state: paused;*/
         &:before {
-            content: 'Выберите окно';
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 30px;
-            width: 100%;
-            height: 100%;
-            color: $blue;
-            background-color: $rgba-50;
-            font-size: 2.5rem;
-            line-height: 2.5rem;
-            box-sizing: border-box;
-            transition: all .15s ease;
-            z-index: 5;
+          content: 'Выбрать это окно';
+          color: $rgba-255;
+          background-color: $blue-50;
         }
-        &:hover {
-            /*animation-play-state: paused;*/
-            &:before {
-                content: 'Выбрать это окно';
-                color: $rgba-255;
-                background-color: $blue-50;
-            }
-        }
+      }
     }
     &--flicker#{$this}--disabled {
-        &:before {
-            display: none;
+      &:before {
+        display: none;
+      }
+      &:hover {
+        #{$this}__append {
+          background-color: $blue;
+          opacity: .5;
         }
-        &:hover {
-            #{$this}__append {
-                background-color: $blue;
-                opacity: .5;
-            }
-        }
+      }
     }
   }
   .error {
@@ -618,7 +630,7 @@ export default {
       height: calc(33vh - (128px / 3));
       &__btn {
         &--chat {
-            display: none;
+          display: none;
         }
       }
       &__chat {
@@ -641,7 +653,7 @@ export default {
       height: calc(33vh - (136px / 3));
       &__btn {
         &--chat {
-            display: inline-block;
+          display: inline-block;
         }
       }
       &__chat {
@@ -653,7 +665,7 @@ export default {
       }
       &--first & {
         &__chat {
-            position: relative;
+          position: relative;
         }
       }
       &--scale {

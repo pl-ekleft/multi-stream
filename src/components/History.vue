@@ -11,21 +11,21 @@ export default {
   components: {
 
   },
-  data () {
+  data() {
     return {
-      windows: {},
+      windows: {}
     }
   },
-  created () {
+  created() {
     this.checkWindows()
   },
   methods: {
-    checkWindows () {
+    checkWindows() {
       if (localStorage.windows !== null) { // проверяем наличие windows в localStorage
         this.windows = JSON.parse(localStorage.windows) // если найдено, то назначаем (предварительно переведя в объект)
       }
-    },
-  },
+    }
+  }
 }
 </script>
 

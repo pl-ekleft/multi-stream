@@ -8,7 +8,7 @@
         placeholder="Введите запрос"
         @click="clearSelectVideoUrl"
         @change="sendingRequest"
-      >
+      />
     </keep-alive>
     <div
       class="form-search__btn"
@@ -28,7 +28,7 @@
           <img
             :src="item.snippet.thumbnails.default.url"
             :alt="item.snippet.title"
-          >
+          />
         </div>
         <div class="form-search-list__title">
           {{ item.snippet.title }}
@@ -46,27 +46,27 @@ import { eventEmitter } from '../main.js'
 
 export default {
   name: 'SearchBar',
-  data () {
+  data() {
     return {
       provider: 'youtube',
       query: '',
       result: false,
       showResult: false,
-      pageNumber: 0,
+      pageNumber: 0
     }
   },
   computed: {
-    checkSearchResult () {
+    checkSearchResult() {
       return this.$store.getters.getSearchShadow
-    },
+    }
   },
-  created () {
+  created() {
     eventEmitter.$on('searchHide', (payload) => { // Прослушиваем событие searchHide
       this.toggleResult(payload)
     })
   },
   methods: {
-    selectVideoUrl (videoId) {
+    selectVideoUrl(videoId) {
       if (this.provider === 'youtube' && videoId.length) {
         // Преобразуем videoId в валидный url и диспатчим
         this.$store.dispatch('setSelectVideoUrl', `https://www.youtube.com/embed/${videoId}`)
@@ -76,10 +76,10 @@ export default {
       }
       this.toggleResult(false)
     },
-    clearSelectVideoUrl () { // очищаем выбранный url видео
+    clearSelectVideoUrl() { // очищаем выбранный url видео
       this.$store.dispatch('clearSelectVideoUrl')
     },
-    sendingRequest () {
+    sendingRequest() {
       if (this.provider === 'youtube' && this.query.length) {
         this.$store.dispatch('search', this.query) // отправляем поисковый запрос
           .then(() => {
@@ -90,7 +90,7 @@ export default {
               this.toggleResult(false)
               this.$store.dispatch('setError', {
                 text: 'Поиск не дал результатов',
-                index: 'main',
+                index: 'main'
               })
             }
             // console.log('sendingRequest result:', this.result);
@@ -100,7 +100,7 @@ export default {
               chat: {
                 show: 0
               }
-            }) */
+            },0) */
           })
           .catch(() => {
           })
@@ -109,11 +109,11 @@ export default {
         this.$store.dispatch('setError', { text: 'Поисковый запрос пуст', index: 'main' })
       }
     },
-    toggleResult (status) {
+    toggleResult(status) {
       this.showResult = status /* TODO: На сколько сильно это необходимо? */
       this.$store.dispatch('setShadow', status)
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -272,11 +272,11 @@ export default {
     }
   }
   @media only screen and (max-width: 812px) {
-      .form-search {
-          margin: 0 20px;
-          &__btn {
-              width: 28px;
-          }
+    .form-search {
+      margin: 0 20px;
+      &__btn {
+        width: 28px;
       }
+    }
   }
 </style>

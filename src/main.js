@@ -10,5 +10,5 @@ export const eventEmitter = new Vue()
 new Vue({
   render: h => h(App),
   router,
-  store,
+  store
 }).$mount('#app')

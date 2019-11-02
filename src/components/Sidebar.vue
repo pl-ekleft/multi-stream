@@ -94,20 +94,20 @@ import { eventEmitter } from '../main.js'
 
 export default {
   name: 'Sidebar',
-  data () {
+  data() {
     return {
       sidebarShowHold: 0,
       sidebarShow: 0,
-      shadowShow: 0,
+      shadowShow: 0
     }
   },
   computed: {
     ...mapGetters('menu', {
-      menuList: 'items',
-    }),
+      menuList: 'items'
+    })
   },
   watch: {
-    sidebarShow () {
+    sidebarShow() {
       if (this.sidebarShowHold) {
         setTimeout(() => {
           this.sidebarShowHold = !this.sidebarShowHold
@@ -115,15 +115,15 @@ export default {
       } else {
         this.sidebarShowHold = !this.sidebarShowHold
       }
-    },
+    }
   },
-  created () {
+  created() {
     eventEmitter.$on('sidebarShow', () => { // Прослушиваем событие sidebarShow
       this.toggleSidebar()
     })
   },
   methods: {
-    toggleSidebar () {
+    toggleSidebar() {
       this.sidebarShow = !this.sidebarShow
       this.shadowShow = !this.shadowShow
 
@@ -133,19 +133,21 @@ export default {
         document.querySelector('html').removeAttribute('class')
       }
     },
-    insertVideo () { // вставляем видео - тест
-      eventEmitter.$emit('urlUpdate') // Вызываем событие urlUpdate
+    insertVideo() { // вставляем видео - тест
+      eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/watch?v=EFIotmFi5Sk', chat: { show: 1 }}, 0) // Вызываем событие urlUpdate
+      eventEmitter.$emit('urlUpdate', { url: 'https://www.twitch.tv/willerz' }, 1)
+      eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/embed/ALZHF5UqnU4' }, 2)
       this.toggleSidebar()
     },
-    openError () { // открываем ошибку - тест
+    openError() { // открываем ошибку - тест
       this.$store.dispatch('setError', { text: 'Пример общей ошибки', index: 'main' })
       this.toggleSidebar()
     },
-    removeWindowsInStorage () {
+    removeWindowsInStorage() {
       eventEmitter.$emit('cleanUpdate') // Вызываем событие cleanUpdate
       this.toggleSidebar()
-    },
-  },
+    }
+  }
 }
 </script>
 

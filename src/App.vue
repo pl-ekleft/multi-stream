@@ -39,26 +39,26 @@ export default {
   components: {
     errorBox: Error,
     sideBar: Sidebar,
-    searchBar: SearchBar,
+    searchBar: SearchBar
   },
-  data () {
+  data() {
     return {
 
     }
   },
   computed: {
-    checkSearchResult () {
+    checkSearchResult() {
       return this.$store.getters.getSearchShadow
-    },
+    }
   },
   methods: {
-    toggleSidebar () {
+    toggleSidebar() {
       eventEmitter.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
     },
-    hideSearchResult (payload) {
+    hideSearchResult(payload) {
       eventEmitter.$emit('searchHide', payload)
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -97,6 +97,9 @@ export default {
     }
     &:disabled {
       cursor: default;
+    }
+    &:focus {
+      outline: 1px solid $blue;
     }
   }
   .header {

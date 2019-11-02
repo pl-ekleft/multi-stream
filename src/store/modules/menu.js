@@ -4,13 +4,13 @@ export default {
     items: [
       {
         url: '/history',
-        text: 'Показать историю',
-      },
-    ],
+        text: 'Показать историю'
+      }
+    ]
   },
   getters: {
-    items (state) {
+    items(state) {
       return state.items
-    },
-  },
+    }
+  }
 }
