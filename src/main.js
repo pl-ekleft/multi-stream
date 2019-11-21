@@ -5,7 +5,7 @@ import store from './store' // настройка vuex
 
 Vue.config.productionTip = false
 
-export const eventEmitter = new Vue()
+export const eventEmitter = new Vue() // шина событий
 
 new Vue({
   render: h => h(App),

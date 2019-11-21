@@ -134,7 +134,7 @@ export default {
       }
     },
     insertVideo() { // вставляем видео - тест
-      eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/watch?v=EFIotmFi5Sk', chat: { show: 1 }}, 0) // Вызываем событие urlUpdate
+      eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/watch?v=KvRVky0r7YM', chat: { show: 1 }}, 0) // Вызываем событие urlUpdate
       eventEmitter.$emit('urlUpdate', { url: 'https://www.twitch.tv/willerz' }, 1)
       eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/embed/ALZHF5UqnU4' }, 2)
       this.toggleSidebar()
