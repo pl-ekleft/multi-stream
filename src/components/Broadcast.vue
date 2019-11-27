@@ -99,7 +99,6 @@
 </template>
 
 <script>
-import { eventEmitter } from '../main.js'
 import urlParser from 'js-video-url-parser'
 import Error from './Error.vue'
 
@@ -164,7 +163,7 @@ export default {
       this.addBroadcast() // вставляем окно добавления (по умолчанию оно блокируется)
     }
 
-    eventEmitter.$on('urlUpdate', (payload, key = 0) => { // Прослушиваем событие urlUpdate
+    this.$root.$on('urlUpdate', (payload, key = 0) => { // Прослушиваем событие urlUpdate
       /* TODO: Подумать, для каких целей нужно данное событие */
       payload = payload || { url: 'https://www.youtube.com/watch?v=EFIotmFi5Sk', chat: { show: 1 }}
       if (this.settings.windowsInterator <= key) { // проверяем, существует ли окно
@@ -173,7 +172,7 @@ export default {
       this.lineProcessing(key, payload) // присваиваем данные для выбранного окна
     })
 
-    eventEmitter.$on('cleanUpdate', () => { // Событие для сброса windows в state
+    this.$root.$on('cleanUpdate', () => { // Событие для сброса windows в state
       this.removeLocalStorage()
     })
   },

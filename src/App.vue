@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import { eventEmitter } from './main.js'
 import Sidebar from './components/Sidebar.vue'
 import SearchBar from './components/SearchBar.vue'
 import Error from './components/Error.vue'
@@ -53,10 +52,10 @@ export default {
   },
   methods: {
     toggleSidebar() {
-      eventEmitter.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
+      this.$root.$emit('sidebarShow') // вызов события sidebarShow (без параметров)
     },
     hideSearchResult(payload) {
-      eventEmitter.$emit('searchHide', payload)
+      this.$root.$emit('searchHide', payload)
     }
   }
 }

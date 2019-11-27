@@ -90,7 +90,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { eventEmitter } from '../main.js'
 
 export default {
   name: 'Sidebar',
@@ -118,7 +117,7 @@ export default {
     }
   },
   created() {
-    eventEmitter.$on('sidebarShow', () => { // Прослушиваем событие sidebarShow
+    this.$root.$on('sidebarShow', () => { // Прослушиваем событие sidebarShow
       this.toggleSidebar()
     })
   },
@@ -134,9 +133,9 @@ export default {
       }
     },
     insertVideo() { // вставляем видео - тест
-      eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/watch?v=KvRVky0r7YM', chat: { show: 1 }}, 0) // Вызываем событие urlUpdate
-      eventEmitter.$emit('urlUpdate', { url: 'https://www.twitch.tv/willerz' }, 1)
-      eventEmitter.$emit('urlUpdate', { url: 'https://www.youtube.com/embed/ALZHF5UqnU4' }, 2)
+      this.$root.$emit('urlUpdate', { url: 'https://www.youtube.com/watch?v=KvRVky0r7YM', chat: { show: 1 }}, 0) // Вызываем событие urlUpdate
+      this.$root.$emit('urlUpdate', { url: 'https://www.twitch.tv/willerz' }, 1)
+      this.$root.$emit('urlUpdate', { url: 'https://www.youtube.com/embed/ALZHF5UqnU4' }, 2)
       this.toggleSidebar()
     },
     openError() { // открываем ошибку - тест
@@ -144,7 +143,7 @@ export default {
       this.toggleSidebar()
     },
     removeWindowsInStorage() {
-      eventEmitter.$emit('cleanUpdate') // Вызываем событие cleanUpdate
+      this.$root.$emit('cleanUpdate') // Вызываем событие cleanUpdate
       this.toggleSidebar()
     }
   }

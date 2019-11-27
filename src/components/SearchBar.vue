@@ -42,8 +42,6 @@
 </template>
 
 <script>
-import { eventEmitter } from '../main.js'
-
 export default {
   name: 'SearchBar',
   data() {
@@ -61,7 +59,7 @@ export default {
     }
   },
   created() {
-    eventEmitter.$on('searchHide', (payload) => { // Прослушиваем событие searchHide
+    this.$root.$on('searchHide', (payload) => { // Прослушиваем событие searchHide
       this.toggleResult(payload)
     })
   },
@@ -95,7 +93,7 @@ export default {
             }
             // console.log('sendingRequest result:', this.result);
             /* TODO: Тестово выводим первое видео в первое окно через вызов события
-            eventEmitter.$emit('urlUpdate',{
+            this.$root.$emit('urlUpdate',{
               url:`https://www.youtube.com/embed/${this.result.items[0].id.videoId}`,
               chat: {
                 show: 0
